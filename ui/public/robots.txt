@@ -2,4 +2,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://mohamedkh3.github.io/agent-account-lab/sitemap.xml
+Sitemap: https://mohamed-khairy-5i.github.io/agent-account-lab/sitemap.xml

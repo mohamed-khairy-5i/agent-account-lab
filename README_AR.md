@@ -205,7 +205,7 @@ npm run ui
   title = {Agent Account Lab: Empirical Benchmark for AI Agent Multi-Account Disambiguation & Context Safety},
   year = {2026},
   publisher = {GitHub},
-  howpublished = {\url{https://github.com/mohamedkh3/agent-account-lab}}
+  howpublished = {\url{https://github.com/mohamed-khairy-5i/agent-account-lab}}
 }
 ```
 

@@ -6,13 +6,13 @@
   "description": "Synthetic multi-account testing & empirical benchmark for AI agents: detect wrong-account tool calls even when all accounts are authorized.",
   "author": "Eng. Mohamed Khairy",
   "license": "MIT",
-  "homepage": "https://github.com/mohamedkh3/agent-account-lab#readme",
+  "homepage": "https://github.com/mohamed-khairy-5i/agent-account-lab#readme",
   "repository": {
     "type": "git",
-    "url": "https://github.com/mohamedkh3/agent-account-lab.git"
+    "url": "https://github.com/mohamed-khairy-5i/agent-account-lab.git"
   },
   "bugs": {
-    "url": "https://github.com/mohamedkh3/agent-account-lab/issues"
+    "url": "https://github.com/mohamed-khairy-5i/agent-account-lab/issues"
   },
   "keywords": [
     "ai-agents",
