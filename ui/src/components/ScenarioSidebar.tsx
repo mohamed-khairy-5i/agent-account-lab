@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import type { Scenario } from '../../../src/types.ts';
 import { SearchIcon } from './Icons.tsx';
+import { useLanguage } from '../i18n.tsx';
 
 interface ScenarioSidebarProps {
   scenarios: Scenario[];
@@ -9,11 +10,14 @@ interface ScenarioSidebarProps {
 }
 
 export const ScenarioSidebar: React.FC<ScenarioSidebarProps> = ({ scenarios, activeId, onSelect }) => {
+  const { t, getScenarioTitle } = useLanguage();
   const [search, setSearch] = useState('');
   const [filterType, setFilterType] = useState<'all' | 'explicit' | 'ambiguous'>('all');
 
   const filtered = scenarios.filter(s => {
+    const title = getScenarioTitle(s.id, s.title_ar);
     const matchesSearch = s.id.toLowerCase().includes(search.toLowerCase()) ||
+      title.toLowerCase().includes(search.toLowerCase()) ||
       s.title_ar.toLowerCase().includes(search.toLowerCase()) ||
       s.messages[0]?.content.toLowerCase().includes(search.toLowerCase());
     if (!matchesSearch) return false;
@@ -31,7 +35,7 @@ export const ScenarioSidebar: React.FC<ScenarioSidebarProps> = ({ scenarios, act
         <input
           type="text"
           className="search-field"
-          placeholder="بحث في السيناريوهات..."
+          placeholder={t.search_placeholder}
           value={search}
           onChange={(e) => setSearch(e.target.value)}
         />
@@ -46,21 +50,21 @@ export const ScenarioSidebar: React.FC<ScenarioSidebarProps> = ({ scenarios, act
           onClick={() => setFilterType('all')}
           style={{ cursor: 'pointer', border: '1px solid var(--border-subtle)' }}
         >
-          الكل ({scenarios.length})
+          {t.filter_all} ({scenarios.length})
         </button>
         <button
           className={`pill ${filterType === 'explicit' ? 'pill-indigo' : 'pill-neutral'}`}
           onClick={() => setFilterType('explicit')}
           style={{ cursor: 'pointer', border: '1px solid var(--border-subtle)' }}
         >
-          أهداف صريحة ({explicitCount})
+          {t.filter_explicit} ({explicitCount})
         </button>
         <button
           className={`pill ${filterType === 'ambiguous' ? 'pill-amber' : 'pill-neutral'}`}
           onClick={() => setFilterType('ambiguous')}
           style={{ cursor: 'pointer', border: '1px solid var(--border-subtle)' }}
         >
-          حالات غموض ({ambiguousCount})
+          {t.filter_ambiguous} ({ambiguousCount})
         </button>
       </div>
 
@@ -68,6 +72,7 @@ export const ScenarioSidebar: React.FC<ScenarioSidebarProps> = ({ scenarios, act
         {filtered.map(s => {
           const isSelected = s.id === activeId;
           const isClarification = s.oracle.require_clarification;
+          const title = getScenarioTitle(s.id, s.title_ar);
 
           return (
             <button
@@ -79,15 +84,15 @@ export const ScenarioSidebar: React.FC<ScenarioSidebarProps> = ({ scenarios, act
                 <span className="scenario-id-tag">{s.id}</span>
                 {isClarification ? (
                   <span className="pill pill-amber" style={{ fontSize: '0.65rem', padding: '1px 6px' }}>
-                    غموض يتطلب سؤالاً
+                    {t.filter_ambiguous}
                   </span>
                 ) : (
                   <span className="pill pill-neutral" style={{ fontSize: '0.65rem', padding: '1px 6px' }}>
-                    هدف صريح
+                    {t.filter_explicit}
                   </span>
                 )}
               </div>
-              <div className="scenario-name">{s.title_ar}</div>
+              <div className="scenario-name">{title}</div>
             </button>
           );
         })}

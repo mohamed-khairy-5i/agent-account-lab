@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import type { SimulationResult } from '../engine.ts';
 import { ArrowRightIcon, RefreshIcon, DownloadIcon, LayersIcon } from './Icons.tsx';
+import { useLanguage } from '../i18n.tsx';
 
 interface BatchOverviewProps {
   onRunBatch: (onProgress: (done: number, total: number) => void) => Promise<SimulationResult[]>;
@@ -8,6 +9,7 @@ interface BatchOverviewProps {
 }
 
 export const BatchOverview: React.FC<BatchOverviewProps> = ({ onRunBatch, onBack }) => {
+  const { lang } = useLanguage();
   const [isRunning, setIsRunning] = useState(false);
   const [progress, setProgress] = useState<{ done: number; total: number } | null>(null);
   const [batchData, setBatchData] = useState<{
@@ -15,7 +17,8 @@ export const BatchOverview: React.FC<BatchOverviewProps> = ({ onRunBatch, onBack
     totalRuns: number;
     agents: {
       name: string;
-      label: string;
+      labelAr: string;
+      labelEn: string;
       pass: number;
       safe_stop: number;
       fail: number;
@@ -27,7 +30,8 @@ export const BatchOverview: React.FC<BatchOverviewProps> = ({ onRunBatch, onBack
     agents: [
       {
         name: 'oracle-reference',
-        label: 'المرجع الاختباري (Oracle Reference)',
+        labelAr: 'المرجع الاختباري (Oracle Reference)',
+        labelEn: 'Oracle Reference (Ground Truth)',
         pass: 95,
         safe_stop: 5,
         fail: 0,
@@ -35,7 +39,8 @@ export const BatchOverview: React.FC<BatchOverviewProps> = ({ onRunBatch, onBack
       },
       {
         name: 'first_account',
-        label: 'ضابط سلبي: أول حساب (First Account)',
+        labelAr: 'ضابط سلبي: أول حساب (First Account)',
+        labelEn: 'Negative Control: First Account',
         pass: 34,
         safe_stop: 0,
         fail: 66,
@@ -43,7 +48,8 @@ export const BatchOverview: React.FC<BatchOverviewProps> = ({ onRunBatch, onBack
       },
       {
         name: 'default_account',
-        label: 'ضابط سلبي: الحساب الافتراضي (Default Account)',
+        labelAr: 'ضابط سلبي: الحساب الافتراضي (Default Account)',
+        labelEn: 'Negative Control: Default Account',
         pass: 31,
         safe_stop: 0,
         fail: 69,
@@ -66,9 +72,12 @@ export const BatchOverview: React.FC<BatchOverviewProps> = ({ onRunBatch, onBack
         const rows = results.filter(r => r.agent_name === name);
         return {
           name,
-          label: name === 'oracle-reference' 
+          labelAr: name === 'oracle-reference' 
             ? 'المرجع الاختباري (Oracle Reference)' 
             : (name === 'first_account' ? 'ضابط أول حساب (First Account)' : 'ضابط الحساب الافتراضي (Default Account)'),
+          labelEn: name === 'oracle-reference'
+            ? 'Oracle Reference (Ground Truth)'
+            : (name === 'first_account' ? 'Negative Control: First Account' : 'Negative Control: Default Account'),
           pass: rows.filter(r => r.verdict === 'PASS').length,
           safe_stop: rows.filter(r => r.verdict === 'SAFE_STOP').length,
           fail: rows.filter(r => r.verdict === 'FAIL').length,
@@ -104,17 +113,21 @@ export const BatchOverview: React.FC<BatchOverviewProps> = ({ onRunBatch, onBack
           <div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
               <LayersIcon size={18} color="#818cf8" />
-              <h2 style={{ fontSize: '1.15rem', fontWeight: 800 }}>المحاكاة الشاملة (100 حالة × 3 وكلاء)</h2>
+              <h2 style={{ fontSize: '1.15rem', fontWeight: 800 }}>
+                {lang === 'ar' ? 'المحاكاة الشاملة (100 حالة × 3 وكلاء)' : 'Comprehensive Simulation (100 Cases × 3 Agents)'}
+              </h2>
             </div>
             <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
-              فحص اتساق المختبر عبر كافة العائلات العشرين وتفرعاتها الخمس (300 تشغيل في الذاكرة).
+              {lang === 'ar' 
+                ? 'فحص اتساق المختبر عبر كافة العائلات العشرين وتفرعاتها الخمس (300 تشغيل في الذاكرة).'
+                : 'Deterministic consistency evaluation across all 20 base families and 5 permutations (300 in-memory runs).'}
             </p>
           </div>
 
           <div style={{ display: 'flex', gap: '8px' }}>
             <button className="btn btn-secondary-action" onClick={onBack}>
               <ArrowRightIcon size={13} />
-              العودة
+              {lang === 'ar' ? 'العودة' : 'Back'}
             </button>
             <button 
               className="btn btn-primary-action" 
@@ -122,7 +135,7 @@ export const BatchOverview: React.FC<BatchOverviewProps> = ({ onRunBatch, onBack
               disabled={isRunning}
             >
               <RefreshIcon size={13} />
-              {isRunning ? 'جاري التشغيل...' : 'إعادة تشغيل المحاكاة'}
+              {isRunning ? (lang === 'ar' ? 'جاري التشغيل...' : 'Running...') : (lang === 'ar' ? 'إعادة تشغيل المحاكاة' : 'Re-run Benchmark')}
             </button>
           </div>
         </div>
@@ -130,7 +143,7 @@ export const BatchOverview: React.FC<BatchOverviewProps> = ({ onRunBatch, onBack
         {progress && (
           <div style={{ margin: '16px 0', padding: '12px 14px', background: '#121215', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-subtle)' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '6px', fontSize: '0.78rem' }}>
-              <span>تقدم المحاكاة:</span>
+              <span>{lang === 'ar' ? 'تقدم المحاكاة:' : 'Simulation Progress:'}</span>
               <span className="font-mono">{progress.done} / {progress.total}</span>
             </div>
             <div style={{ height: '5px', background: 'var(--border-subtle)', borderRadius: 'var(--radius-full)', overflow: 'hidden' }}>
@@ -149,34 +162,37 @@ export const BatchOverview: React.FC<BatchOverviewProps> = ({ onRunBatch, onBack
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '14px', marginTop: '16px' }}>
           {batchData?.agents.map(ag => {
             const passPct = Math.round((ag.pass / (ag.pass + ag.fail + ag.safe_stop)) * 100);
+            const label = lang === 'ar' ? ag.labelAr : ag.labelEn;
 
             return (
               <div key={ag.name} style={{ background: '#121215', border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-sm)', padding: '14px' }}>
-                <div style={{ fontWeight: 700, fontSize: '0.9rem', marginBottom: '2px' }}>{ag.label}</div>
+                <div style={{ fontWeight: 700, fontSize: '0.9rem', marginBottom: '2px' }}>{label}</div>
                 <div className="font-mono" style={{ fontSize: '0.7rem', color: 'var(--text-dim)', marginBottom: '12px' }}>{ag.name}</div>
 
                 <div style={{ display: 'flex', alignItems: 'baseline', gap: '6px', marginBottom: '12px' }}>
                   <span style={{ fontSize: '1.7rem', fontWeight: 800, color: passPct > 80 ? '#10b981' : '#f43f5e' }}>
                     {passPct}%
                   </span>
-                  <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>نسبة المطابقة</span>
+                  <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
+                    {lang === 'ar' ? 'نسبة المطابقة' : 'Compliance Rate'}
+                  </span>
                 </div>
 
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '5px', fontSize: '0.78rem' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                    <span style={{ color: '#10b981' }}>نجاح (PASS):</span>
+                    <span style={{ color: '#10b981' }}>{lang === 'ar' ? 'نجاح (PASS):' : 'Pass (PASS):'}</span>
                     <strong className="font-mono">{ag.pass}</strong>
                   </div>
                   <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                    <span style={{ color: '#f59e0b' }}>توقف آمن (SAFE_STOP):</span>
+                    <span style={{ color: '#f59e0b' }}>{lang === 'ar' ? 'توقف آمن (SAFE_STOP):' : 'Safe Stop (SAFE_STOP):'}</span>
                     <strong className="font-mono">{ag.safe_stop}</strong>
                   </div>
                   <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                    <span style={{ color: '#f43f5e' }}>فشل (FAIL):</span>
+                    <span style={{ color: '#f43f5e' }}>{lang === 'ar' ? 'فشل (FAIL):' : 'Fail (FAIL):'}</span>
                     <strong className="font-mono">{ag.fail}</strong>
                   </div>
                   <div style={{ display: 'flex', justifyContent: 'space-between', borderTop: '1px solid var(--border-subtle)', paddingTop: '6px' }}>
-                    <span style={{ color: '#fda4af' }}>أثر خاطئ منفّذ:</span>
+                    <span style={{ color: '#fda4af' }}>{lang === 'ar' ? 'أثر خاطئ منفّذ:' : 'Mistargeted Writes:'}</span>
                     <strong className="font-mono" style={{ color: '#f43f5e' }}>{ag.wrong_effects}</strong>
                   </div>
                 </div>
@@ -187,12 +203,14 @@ export const BatchOverview: React.FC<BatchOverviewProps> = ({ onRunBatch, onBack
 
         <div style={{ marginTop: '20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <div style={{ fontSize: '0.72rem', color: 'var(--text-dim)' }}>
-            * بيانات محاكاة حتمية لفحص اتساق المختبر؛ لا تمثل نتائج نماذج ذكاء اصطناعي.
+            {lang === 'ar' 
+              ? '* بيانات محاكاة حتمية لفحص اتساق المختبر؛ لا تمثل نتائج نماذج ذكاء اصطناعي.'
+              : '* In-memory deterministic controls verifying harness integrity; not real AI benchmark scores.'}
           </div>
 
           <button className="btn btn-secondary-action" onClick={downloadJson}>
             <DownloadIcon size={13} />
-            تصدير تقرير JSON
+            {lang === 'ar' ? 'تصدير تقرير JSON' : 'Export JSON Summary'}
           </button>
         </div>
       </div>

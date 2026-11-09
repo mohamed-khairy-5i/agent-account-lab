@@ -1,6 +1,7 @@
 import React from 'react';
 import type { World } from '../../../src/types.ts';
 import { LayersIcon } from './Icons.tsx';
+import { useLanguage } from '../i18n.tsx';
 
 interface WorldDiffViewerProps {
   initialWorld: World;
@@ -13,16 +14,17 @@ export const WorldDiffViewer: React.FC<WorldDiffViewerProps> = ({
   finalWorld,
   targetAccountId
 }) => {
+  const { lang, t } = useLanguage();
   const accounts = initialWorld.accounts || [];
 
   return (
     <div className="ui-card">
       <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
         <LayersIcon size={16} color="#818cf8" />
-        <h3 style={{ fontSize: '0.92rem', fontWeight: 700 }}>مقارنة حالة الحسابات والملفات (قبل وبعد التشغيل)</h3>
+        <h3 style={{ fontSize: '0.92rem', fontWeight: 700 }}>{t.diff_title}</h3>
       </div>
       <p style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginBottom: '14px' }}>
-        رصد مباشر لما إذا كان الوكيل قد غيّر أي ملف في الحساب الخاطئ (رغم أن صلاحيته تسمح بذلك).
+        {t.diff_sub}
       </p>
 
       <div className="diff-container-grid">
@@ -42,18 +44,18 @@ export const WorldDiffViewer: React.FC<WorldDiffViewerProps> = ({
                 </div>
 
                 {isTarget ? (
-                  <span className="pill pill-emerald">الحساب المستهدف</span>
+                  <span className="pill pill-emerald">{lang === 'ar' ? 'الحساب المستهدف' : 'Target Account'}</span>
                 ) : (
-                  <span className="pill pill-neutral">غير مستهدف</span>
+                  <span className="pill pill-neutral">{lang === 'ar' ? 'غير مستهدف' : 'Non-Target'}</span>
                 )}
               </div>
 
               <table className="clean-table">
                 <thead>
                   <tr>
-                    <th>معرّف الملف</th>
-                    <th>الحالة الأولية</th>
-                    <th>الحالة النهائية</th>
+                    <th>{lang === 'ar' ? 'معرّف الملف' : 'File ID'}</th>
+                    <th>{t.state_before}</th>
+                    <th>{t.state_after}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -83,17 +85,17 @@ export const WorldDiffViewer: React.FC<WorldDiffViewerProps> = ({
                               <div>{finalFile.name}</div>
                               {isChanged && !isTarget && (
                                 <span style={{ color: '#f43f5e', fontSize: '0.7rem', fontWeight: 600, display: 'block' }}>
-                                  تعديل خاطئ في غير حسابه!
+                                  {lang === 'ar' ? 'تعديل خاطئ في غير حسابه!' : 'Wrong-Account Mutation!'}
                                 </span>
                               )}
                               {isChanged && isTarget && (
                                 <span style={{ color: '#10b981', fontSize: '0.7rem', fontWeight: 600, display: 'block' }}>
-                                  تعديل مطابق للنية
+                                  {lang === 'ar' ? 'تعديل مطابق للنية' : 'Intended Mutation Observed'}
                                 </span>
                               )}
                             </>
                           ) : (
-                            <span style={{ color: '#f43f5e' }}>محذوف</span>
+                            <span style={{ color: '#f43f5e' }}>{lang === 'ar' ? 'محذوف' : 'Deleted'}</span>
                           )}
                         </td>
                       </tr>

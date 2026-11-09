@@ -2,6 +2,7 @@ import React from 'react';
 import type { Scenario, TestCase } from '../../../src/types.ts';
 import type { AgentChoice } from '../engine.ts';
 import { PlayIcon, RefreshIcon } from './Icons.tsx';
+import { useLanguage } from '../i18n.tsx';
 
 interface ScenarioViewerProps {
   scenario: Scenario;
@@ -15,12 +16,12 @@ interface ScenarioViewerProps {
   onQuickCompare: () => void;
 }
 
-const VARIANT_NAMES: Record<string, string> = {
-  base: 'الترتيب الأصلي (Base)',
-  reverse_accounts: 'عكس ترتيب الحسابات (Reverse Accounts)',
-  flip_default: 'قلب الحساب الافتراضي (Flip Default)',
-  reverse_files: 'عكس ترتيب الملفات (Reverse Files)',
-  add_decoy: 'حقن حساب تمويه ثالث (Add Decoy)'
+const VARIANT_NAMES: Record<string, { ar: string; en: string }> = {
+  base: { ar: 'الترتيب الأصلي (Base)', en: 'Original Order (Base)' },
+  reverse_accounts: { ar: 'عكس ترتيب الحسابات (Reverse Accounts)', en: 'Reverse Accounts Order' },
+  flip_default: { ar: 'قلب الحساب الافتراضي (Flip Default)', en: 'Flip Default Account' },
+  reverse_files: { ar: 'عكس ترتيب الملفات (Reverse Files)', en: 'Reverse Files Order' },
+  add_decoy: { ar: 'حقن حساب تمويه ثالث (Add Decoy)', en: 'Inject Decoy Account' }
 };
 
 export const ScenarioViewer: React.FC<ScenarioViewerProps> = ({
@@ -34,6 +35,10 @@ export const ScenarioViewer: React.FC<ScenarioViewerProps> = ({
   isRunning,
   onQuickCompare
 }) => {
+  const { lang, t, getScenarioTitle, getScenarioPrompt } = useLanguage();
+  const title = getScenarioTitle(scenario.id, scenario.title_ar);
+  const prompt = getScenarioPrompt(scenario.id, scenario.messages[0]?.content || '');
+
   return (
     <div className="ui-card">
       <div className="ui-card-header">
@@ -42,23 +47,23 @@ export const ScenarioViewer: React.FC<ScenarioViewerProps> = ({
             <span className="pill pill-neutral font-mono">{scenario.id}</span>
             <span className="pill pill-neutral">{scenario.category}</span>
           </div>
-          <h2 className="ui-card-title">{scenario.title_ar}</h2>
+          <h2 className="ui-card-title">{title}</h2>
         </div>
 
-        <div style={{ textAlign: 'left', fontSize: '0.78rem', color: 'var(--text-muted)' }}>
-          <div>الحساب المستهدف: <code style={{ color: '#818cf8' }}>{scenario.oracle.target_account_id}</code></div>
-          <div>العملية المطلوبة: <code style={{ color: '#34d399' }}>{scenario.oracle.operation}</code></div>
+        <div style={{ textAlign: lang === 'ar' ? 'left' : 'right', fontSize: '0.78rem', color: 'var(--text-muted)' }}>
+          <div>{t.target_account} <code style={{ color: '#818cf8' }}>{scenario.oracle.target_account_id}</code></div>
+          <div>{t.target_operation} <code style={{ color: '#34d399' }}>{scenario.oracle.operation}</code></div>
         </div>
       </div>
 
       <div className="prompt-container">
-        <div className="prompt-label">نص طلب المستخدم (Simulated User Prompt)</div>
-        <div className="prompt-text">"{scenario.messages[0]?.content}"</div>
+        <div className="prompt-label">{t.prompt_label}</div>
+        <div className="prompt-text">"{prompt}"</div>
       </div>
 
       <div className="toolbar-row">
         <div className="toolbar-group">
-          <label className="toolbar-label">تنويعة الحالة:</label>
+          <label className="toolbar-label">{t.variant_label}</label>
           <select 
             className="select-clean"
             value={selectedVariant}
@@ -66,30 +71,30 @@ export const ScenarioViewer: React.FC<ScenarioViewerProps> = ({
           >
             {cases.map(c => (
               <option key={c.variant} value={c.variant}>
-                {VARIANT_NAMES[c.variant] || c.variant}
+                {VARIANT_NAMES[c.variant] ? VARIANT_NAMES[c.variant][lang] : c.variant}
               </option>
             ))}
           </select>
         </div>
 
         <div className="toolbar-group">
-          <label className="toolbar-label">الوكيل / النموذج:</label>
+          <label className="toolbar-label">{t.agent_label}</label>
           <select 
             className="select-clean"
             value={selectedAgent}
             onChange={(e) => onAgentChange(e.target.value as AgentChoice)}
           >
-            <optgroup label="⚡ نماذج ذكاء اصطناعي حقيقية (Live Frontier APIs)">
-              <option value="glm-5.3-flash">🥇 GLM-5.3 Flash (75% Score — متصدر التقييم)</option>
-              <option value="kimi-k3">🥈 Kimi K3 (63% Score)</option>
-              <option value="deepseek-v4.1-flash">🥉 DeepSeek V4.1 Flash (50% Score)</option>
-              <option value="qwen-3.8-max">⚡ Qwen 3.8 MAX (50% Score)</option>
-              <option value="gemini-3.8-flash">✨ Gemini 3.8 Flash (44% Score)</option>
+            <optgroup label={lang === 'ar' ? '⚡ نماذج ذكاء اصطناعي حقيقية (Live Frontier APIs)' : '⚡ Frontier AI Models (Live APIs)'}>
+              <option value="glm-5.3-flash">🥇 GLM-5.3 Flash ({lang === 'ar' ? '75% - المتصدر' : '75% - #1 Rank'})</option>
+              <option value="kimi-k3">🥈 Kimi K3 ({lang === 'ar' ? '63% - الثاني' : '63% - #2 Rank'})</option>
+              <option value="deepseek-v4.1-flash">🥉 DeepSeek V4.1 Flash ({lang === 'ar' ? '50% نجاح' : '50% Score'})</option>
+              <option value="qwen-3.8-max">⚡ Qwen 3.8 MAX ({lang === 'ar' ? '50% نجاح' : '50% Score'})</option>
+              <option value="gemini-3.8-flash">✨ Gemini 3.8 Flash ({lang === 'ar' ? '44% نجاح' : '44% Score'})</option>
             </optgroup>
-            <optgroup label="🛠️ ضوابط ومرجع المختبر (Scripted Controls)">
-              <option value="first_account">ضابط سلبي: أول حساب (First Account)</option>
-              <option value="default_account">ضابط سلبي: الحساب الافتراضي (Default Account)</option>
-              <option value="oracle-reference">المرجع الاختباري (Oracle Reference)</option>
+            <optgroup label={lang === 'ar' ? '🛠️ ضوابط ومرجع المختبر (Scripted Controls)' : '🛠️ Scripted Baseline Controls'}>
+              <option value="first_account">{lang === 'ar' ? 'ضابط سلبي: أول حساب (First Account)' : 'Negative Control: First Account'}</option>
+              <option value="default_account">{lang === 'ar' ? 'ضابط سلبي: الحساب الافتراضي (Default Account)' : 'Negative Control: Default Account'}</option>
+              <option value="oracle-reference">{lang === 'ar' ? 'المرجع الاختباري (Oracle Reference)' : 'Ground-Truth Oracle Reference'}</option>
             </optgroup>
           </select>
         </div>
@@ -98,10 +103,10 @@ export const ScenarioViewer: React.FC<ScenarioViewerProps> = ({
           <button 
             className="btn btn-secondary-action"
             onClick={onQuickCompare}
-            title="مقارنة فورية لمعرفة أثر عكس ترتيب الحسابات"
+            title={lang === 'ar' ? 'مقارنة فورية لمعرفة أثر عكس ترتيب الحسابات' : 'Instant comparison to test account order inversion'}
           >
             <RefreshIcon size={13} />
-            مقارنة أثر الترتيب
+            {t.compare_order_btn}
           </button>
 
           <button 
@@ -110,7 +115,7 @@ export const ScenarioViewer: React.FC<ScenarioViewerProps> = ({
             disabled={isRunning}
           >
             <PlayIcon size={12} color="#fff" />
-            {isRunning ? 'جاري التشغيل...' : 'تشغيل الاختبار'}
+            {isRunning ? t.running_btn : t.run_btn}
           </button>
         </div>
       </div>
