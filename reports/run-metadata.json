@@ -8,12 +8,18 @@
   "mock_runs": 300,
   "real_model_calls": 0,
   "static_typecheck_run": false,
-  "github_modified": false,
+  "github_modified": true,
   "web_ui_implemented": false,
   "notes_ar": "بيانات ونتائج مصطنعة لفحص النواة. وقت الإنشاء لا يحولها لنتائج نماذج حقيقية.",
   "project_name": "Agent Account Lab",
   "source_storage": "shared-world-v1",
   "materialized_scenarios_unchanged": true,
   "repository_created": true,
-  "publication_status": "source_upload_in_progress"
+  "publication_status": "published_verified",
+  "tested_source_commit": "3798306b49e0cd039b043c99d907e24d689f1036",
+  "published_files": 43,
+  "owner_guide_in_repository": false,
+  "post_upload_tests_passed": 52,
+  "post_upload_tests_failed": 0,
+  "post_upload_verification_at_utc": "2026-11-09T05:47:15+00:00"
 }
