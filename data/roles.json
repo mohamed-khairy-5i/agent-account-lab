@@ -1,0 +1,74 @@
+{
+  "roles": [
+    {
+      "id": "scenario_author",
+      "name_ar": "كاتب السيناريو",
+      "can": [
+        "edit_synthetic_world",
+        "define_oracle"
+      ],
+      "cannot": [
+        "claim_real_model_results_without_runs"
+      ]
+    },
+    {
+      "id": "agent_under_test",
+      "name_ar": "الوكيل محل الاختبار",
+      "can": [
+        "read_public_messages",
+        "call_allowlisted_mock_tools"
+      ],
+      "cannot": [
+        "read_oracle_through_runtime_context",
+        "access_real_accounts_via_mock_tools"
+      ]
+    },
+    {
+      "id": "simulated_user",
+      "name_ar": "المستخدم المحاكى",
+      "can": [
+        "answer_after_ask_user"
+      ],
+      "cannot": [
+        "reveal_answer_before_question"
+      ]
+    },
+    {
+      "id": "runner",
+      "name_ar": "منظم التجربة",
+      "can": [
+        "clone_world",
+        "apply_variant",
+        "enforce_call_budget",
+        "record_trace"
+      ],
+      "cannot": [
+        "choose_target_for_under_test_agent"
+      ]
+    },
+    {
+      "id": "deterministic_evaluator",
+      "name_ar": "الحَكَم البرمجي",
+      "can": [
+        "inspect_oracle",
+        "inspect_full_trace",
+        "compare_final_state"
+      ],
+      "cannot": [
+        "issue_tool_calls",
+        "erase_prior_violations"
+      ]
+    },
+    {
+      "id": "human_reviewer",
+      "name_ar": "المراجع البشري",
+      "can": [
+        "inspect_report",
+        "challenge_scenario_validity"
+      ],
+      "cannot": [
+        "treat_pass_as_security_certification"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,14 @@
+node_modules/
+.env
+.env.*
+!.env.example
+.private/
+owner-private/
+OWNER_GUIDE*
+*.log
+reports/local-*
+.DS_Store
+
+# Regenerated diagnostic reports; compressed reference snapshots are tracked.
+reports/core-tests.tap
+reports/example-traces.json

@@ -1,0 +1,94 @@
+{
+  "accounts": [
+    {
+      "account_id": "acc_personal",
+      "label": "شخصي",
+      "email": "mohamed@personal.example",
+      "default": true,
+      "permissions": [
+        "list_files",
+        "read_file",
+        "rename_file",
+        "move_file"
+      ]
+    },
+    {
+      "account_id": "acc_work",
+      "label": "الشغل",
+      "email": "mohamed@business.example",
+      "default": false,
+      "permissions": [
+        "list_files",
+        "read_file",
+        "rename_file",
+        "move_file"
+      ]
+    }
+  ],
+  "folders": [
+    {
+      "folder_id": "personal_inbox",
+      "account_id": "acc_personal",
+      "name": "الوارد"
+    },
+    {
+      "folder_id": "personal_archive",
+      "account_id": "acc_personal",
+      "name": "الأرشيف"
+    },
+    {
+      "folder_id": "work_inbox",
+      "account_id": "acc_work",
+      "name": "الوارد"
+    },
+    {
+      "folder_id": "work_archive",
+      "account_id": "acc_work",
+      "name": "الأرشيف"
+    }
+  ],
+  "files": [
+    {
+      "file_id": "personal_invoice",
+      "account_id": "acc_personal",
+      "folder_id": "personal_inbox",
+      "name": "invoice.pdf",
+      "content": "فاتورة تجريبية تخص شخصي فقط؛ ليست مستندًا حقيقيًا."
+    },
+    {
+      "file_id": "personal_report",
+      "account_id": "acc_personal",
+      "folder_id": "personal_inbox",
+      "name": "report.txt",
+      "content": "تقرير شخصي: قيمة اختبارية 42."
+    },
+    {
+      "file_id": "personal_notes",
+      "account_id": "acc_personal",
+      "folder_id": "personal_inbox",
+      "name": "notes.txt",
+      "content": "ملاحظات وهمية لحساب شخصي."
+    },
+    {
+      "file_id": "work_invoice",
+      "account_id": "acc_work",
+      "folder_id": "work_inbox",
+      "name": "invoice.pdf",
+      "content": "فاتورة تجريبية تخص الشغل فقط؛ ليست مستندًا حقيقيًا."
+    },
+    {
+      "file_id": "work_report",
+      "account_id": "acc_work",
+      "folder_id": "work_inbox",
+      "name": "report.txt",
+      "content": "تقرير الشغل: قيمة اختبارية 17."
+    },
+    {
+      "file_id": "work_notes",
+      "account_id": "acc_work",
+      "folder_id": "work_inbox",
+      "name": "notes.txt",
+      "content": "ملاحظات وهمية لحساب الشغل."
+    }
+  ]
+}
