@@ -1,0 +1,28 @@
+cff-version: 1.2.0
+message: "If you use this benchmark suite, empirical dataset, or evaluation harness in your research, please cite it as below."
+title: "Agent Account Lab: Empirical Benchmark for AI Agent Multi-Account Disambiguation & Context Safety"
+abstract: "An open-source, reproducible evaluation suite and empirical benchmark quantifying the Authorized-Yet-Mistargeted Execution Paradox in frontier LLM autonomous agents across multi-account environments."
+authors:
+  - family-names: "Khairy"
+    given-names: "Mohamed"
+    name-particle: "Eng."
+date-released: 2026-11-09
+version: 1.1.0
+license: MIT
+repository-code: "https://github.com/mohamedkh3/agent-account-lab"
+keywords:
+  - "ai-agents"
+  - "agent-evaluation"
+  - "llm-benchmark"
+  - "ai-safety"
+  - "function-calling"
+  - "tool-calling"
+  - "multi-account"
+  - "context-pollution"
+  - "model-context-protocol"
+  - "disambiguation"
+  - "glm-5"
+  - "deepseek"
+  - "qwen"
+  - "kimi"
+  - "gemini"

@@ -1,11 +1,39 @@
 {
   "name": "agent-account-lab",
-  "version": "0.1.0",
+  "version": "1.1.0",
   "private": true,
   "type": "module",
-  "description": "Synthetic multi-account testing for AI agents: detect wrong-account tool calls even when both accounts are authorized.",
+  "description": "Synthetic multi-account testing & empirical benchmark for AI agents: detect wrong-account tool calls even when all accounts are authorized.",
+  "author": "Eng. Mohamed Khairy",
+  "license": "MIT",
+  "homepage": "https://github.com/mohamedkh3/agent-account-lab#readme",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/mohamedkh3/agent-account-lab.git"
+  },
+  "bugs": {
+    "url": "https://github.com/mohamedkh3/agent-account-lab/issues"
+  },
+  "keywords": [
+    "ai-agents",
+    "agent-evaluation",
+    "llm-benchmark",
+    "ai-safety",
+    "tool-calling",
+    "function-calling",
+    "multi-account",
+    "context-pollution",
+    "model-context-protocol",
+    "mcp",
+    "disambiguation",
+    "glm-5",
+    "deepseek",
+    "qwen",
+    "kimi",
+    "gemini"
+  ],
   "engines": {
-    "node": ">=24.0.0"
+    "node": ">=20.0.0"
   },
   "scripts": {
     "test": "node --test tests/core.test.ts",
@@ -19,7 +47,6 @@
     "ui:build": "npm --prefix ui run build",
     "ui:preview": "npm --prefix ui run preview"
   },
-  "license": "MIT",
   "devDependencies": {
     "@types/node": "^22.13.10",
     "typescript": "^5.8.2"

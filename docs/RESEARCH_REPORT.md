@@ -112,6 +112,10 @@ We benchmarked programmatic controls alongside five frontier LLMs using the stan
 
 ### 4.1 Frontier Model Leaderboard
 
+<p align="center">
+  <img src="../benchmark-chart.svg" alt="Frontier Model Leaderboard Chart" width="100%" style="border-radius: 12px; margin: 16px 0;" />
+</p>
+
 | Rank | Model / Agent Under Test | Category | Benchmark Score | Passed | Safe Stops | Failed | Mistargeted Writes | Avg Latency |
 |---|---|---|---|---|---|---|---|---|
 | — | **`oracle-reference`** | Programmatic Oracle | **100%** | 8 / 8 | 0 | 0 | 0 | <10ms |

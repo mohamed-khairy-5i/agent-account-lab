@@ -4,6 +4,16 @@
 
 # Agent Account Lab — «حساب مين؟»
 
+<p align="center">
+  <a href=".github/workflows/ci.yml"><img src="https://img.shields.io/badge/CI-ناجح-10b981?style=flat-square&logo=github-actions" alt="CI Status" /></a>
+  <a href="tsconfig.json"><img src="https://img.shields.io/badge/TypeScript-Strict_5.9-3178c6?style=flat-square&logo=typescript" alt="TypeScript Strict" /></a>
+  <a href="tests"><img src="https://img.shields.io/badge/الاختبارات-52%2F52_ناجحة-10b981?style=flat-square" alt="Tests 52/52 Passing" /></a>
+  <a href="docs/RESEARCH_REPORT.md"><img src="https://img.shields.io/badge/تقييم_النماذج-8_وكلاء-818cf8?style=flat-square" alt="Frontier Benchmark" /></a>
+  <a href="package.json"><img src="https://img.shields.io/badge/Node.js-%3E%3D20.0.0-339933?style=flat-square&logo=node.js" alt="Node Version" /></a>
+  <a href="LICENSE"><img src="https://img.shields.io/badge/الترخيص-MIT-yellow.svg?style=flat-square" alt="License MIT" /></a>
+  <a href="CONTRIBUTING.md"><img src="https://img.shields.io/badge/المساهمات-مرحّب_بها-brightgreen.svg?style=flat-square" alt="PRs Welcome" /></a>
+</p>
+
 مختبر مفتوح المصدر ومحلي بالكامل (Local-First) لاختبار نوع دقيق وخفي من أخطاء وكلاء الذكاء الاصطناعي (AI Agents): **استدعاء الأداة ينجح تقنيًا، لكنه ينفذ التعديل في الحساب الخطأ**.
 
 **الحالة: حزمة متكاملة جاهزة للإنتاج، واجهة ويب تفاعلية كاملة، ونتائج اختبار تجريبية لنماذج الذكاء الاصطناعي.**  
@@ -14,6 +24,10 @@
 ## 🏆 لوحة صدارة النماذج الحقيقية (Frontier Model Leaderboard)
 
 نتائج التقييم التجريبي لنماذج الذكاء الاصطناعي العالمية على حزمة اختبار التمييز بين الحسابات (`temperature: 0`):
+
+<p align="center">
+  <img src="benchmark-chart.svg" alt="الرسم البياني لتقييم النماذج في الفصل بين الحسابات" width="100%" style="border-radius: 12px; margin: 16px 0;" />
+</p>
 
 | الترتيب | النموذج / الوكيل المختبر | الفئة | النتيجة | نجاح (Pass) | توقف آمن | فشل (Fail) | تعديلات خاطئة (Wrong Writes) | متوسط الاستجابة |
 |:---:|---|---|:---:|:---:|:---:|:---:|:---:|:---:|
@@ -178,6 +192,24 @@ npm run ui
 - [x] **المرحلة ٣: موصلات النماذج الحقيقية وتقييم النماذج العالمية** — تم تقييم GLM-5.3، Kimi K3، DeepSeek V4.1، Qwen 3.8، Gemini 3.8.
 - [ ] **المرحلة ٤: سيناريوهات اختبارية منفصلة وحوارات متعددة الجولات** — قيد العمل.
 - [ ] **المرحلة ٥: إطلاق الإصدار الإنتاجي v0.1.0 وتوثيق مجتمعي شامل** — قيد التحضير.
+
+---
+
+## 📚 الاستشهاد الأكاديمي والتوثيق (Citation)
+
+إذا كنت تستخدم هذه الحزمة الاختبارية، مجموعة البيانات التجريبية، أو محرك التقييم في أبحاثك أو تقييم نماذجك، يُرجى الاستشهاد بها كالتالي:
+
+```bibtex
+@misc{khairy2026agentaccountlab,
+  author = {Khairy, Mohamed},
+  title = {Agent Account Lab: Empirical Benchmark for AI Agent Multi-Account Disambiguation & Context Safety},
+  year = {2026},
+  publisher = {GitHub},
+  howpublished = {\url{https://github.com/mohamedkh3/agent-account-lab}}
+}
+```
+
+أو عبر ملف البيانات المرجعية القياسي [CITATION.cff](CITATION.cff).
 
 ---
 

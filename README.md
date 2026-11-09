@@ -4,6 +4,16 @@
 
 # Agent Account Lab — AI Agent Multi-Account Testing
 
+<p align="center">
+  <a href=".github/workflows/ci.yml"><img src="https://img.shields.io/badge/CI-Passing-10b981?style=flat-square&logo=github-actions" alt="CI Status" /></a>
+  <a href="tsconfig.json"><img src="https://img.shields.io/badge/TypeScript-Strict_5.9-3178c6?style=flat-square&logo=typescript" alt="TypeScript Strict" /></a>
+  <a href="tests"><img src="https://img.shields.io/badge/Tests-52%2F52_Passing-10b981?style=flat-square" alt="Tests 52/52 Passing" /></a>
+  <a href="docs/RESEARCH_REPORT.md"><img src="https://img.shields.io/badge/Frontier_Benchmark-8_Agents-818cf8?style=flat-square" alt="Frontier Benchmark" /></a>
+  <a href="package.json"><img src="https://img.shields.io/badge/Node.js-%3E%3D20.0.0-339933?style=flat-square&logo=node.js" alt="Node Version" /></a>
+  <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-yellow.svg?style=flat-square" alt="License MIT" /></a>
+  <a href="CONTRIBUTING.md"><img src="https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat-square" alt="PRs Welcome" /></a>
+</p>
+
 Open-source, local-first testing for a specific AI agent failure: **the tool call succeeds, but it acts in the wrong account**.
 
 Both accounts may be authorized. This lab checks whether the action matches the user's intended account, file, and operation.
@@ -16,6 +26,10 @@ Both accounts may be authorized. This lab checks whether the action matches the 
 ## 🏆 Frontier Multi-Model Benchmark Leaderboard
 
 Empirical evaluation of frontier LLMs against the Agent Account Lab standardized disambiguation suite (`temperature: 0`, OpenAI-compatible endpoints):
+
+<p align="center">
+  <img src="benchmark-chart.svg" alt="Frontier Multi-Model Benchmark Chart" width="100%" style="border-radius: 12px; margin: 16px 0;" />
+</p>
 
 | Rank | Model / Agent Under Test | Category | Score | Pass | Safe Stop | Fail | Mistargeted Writes | Avg Latency |
 |:---:|---|---|:---:|:---:|:---:|:---:|:---:|:---:|
@@ -195,6 +209,24 @@ Running `npm run demo` evaluates 100 generated cases against three reference/con
 - [x] **Phase 3: Real LLM Adapter & Frontier Benchmark** — Evaluated GLM-5.3, Kimi K3, DeepSeek V4.1, Qwen 3.8, Gemini 3.8.
 - [ ] **Phase 4: Held-out Test Scenarios & Multi-turn Dialogs** — In progress.
 - [ ] **Phase 5: Production v0.1.0 Release** — Packaging and community registry.
+
+---
+
+## 📚 Citation & Academic Reference
+
+If you use this benchmark suite, empirical dataset, or evaluation harness in your research or evaluations, please cite:
+
+```bibtex
+@misc{khairy2026agentaccountlab,
+  author = {Khairy, Mohamed},
+  title = {Agent Account Lab: Empirical Benchmark for AI Agent Multi-Account Disambiguation & Context Safety},
+  year = {2026},
+  publisher = {GitHub},
+  howpublished = {\url{https://github.com/mohamedkh3/agent-account-lab}}
+}
+```
+
+Or view the machine-readable [CITATION.cff](CITATION.cff) file.
 
 ---
 
