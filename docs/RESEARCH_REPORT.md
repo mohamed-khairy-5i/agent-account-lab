@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="../logo.png" width="140" alt="Agent Account Lab Logo" style="border-radius: 20px;" />
+</p>
+
 # Agent Account Lab: Evaluating Multi-Account Tool Execution and Positional Disambiguation in Frontier LLMs
 
 **Author:** Mohamed Khairy  
