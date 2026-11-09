@@ -44,27 +44,30 @@ export const ScenarioSidebar: React.FC<ScenarioSidebarProps> = ({ scenarios, act
         </div>
       </div>
 
-      <div style={{ display: 'flex', gap: '6px', padding: '0 12px 10px 12px' }}>
+      <div className="filter-segmented-control">
         <button
-          className={`pill ${filterType === 'all' ? 'pill-indigo' : 'pill-neutral'}`}
+          className={`filter-tab-btn ${filterType === 'all' ? 'active-all' : ''}`}
           onClick={() => setFilterType('all')}
-          style={{ cursor: 'pointer', border: '1px solid var(--border-subtle)' }}
+          title={t.filter_all}
         >
-          {t.filter_all} ({scenarios.length})
+          <span className="filter-tab-label">{t.filter_all}</span>
+          <span className="filter-tab-count">{scenarios.length}</span>
         </button>
         <button
-          className={`pill ${filterType === 'explicit' ? 'pill-indigo' : 'pill-neutral'}`}
+          className={`filter-tab-btn ${filterType === 'explicit' ? 'active-explicit' : ''}`}
           onClick={() => setFilterType('explicit')}
-          style={{ cursor: 'pointer', border: '1px solid var(--border-subtle)' }}
+          title={t.filter_explicit}
         >
-          {t.filter_explicit} ({explicitCount})
+          <span className="filter-tab-label">{t.filter_explicit}</span>
+          <span className="filter-tab-count">{explicitCount}</span>
         </button>
         <button
-          className={`pill ${filterType === 'ambiguous' ? 'pill-amber' : 'pill-neutral'}`}
+          className={`filter-tab-btn ${filterType === 'ambiguous' ? 'active-ambiguous' : ''}`}
           onClick={() => setFilterType('ambiguous')}
-          style={{ cursor: 'pointer', border: '1px solid var(--border-subtle)' }}
+          title={t.filter_ambiguous}
         >
-          {t.filter_ambiguous} ({ambiguousCount})
+          <span className="filter-tab-label">{t.filter_ambiguous}</span>
+          <span className="filter-tab-count">{ambiguousCount}</span>
         </button>
       </div>
 

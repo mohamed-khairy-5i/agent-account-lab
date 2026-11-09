@@ -259,6 +259,107 @@ code, pre, .font-mono {
   pointer-events: none;
 }
 
+/* Sidebar Segmented Filter Control */
+.filter-segmented-control {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 5px;
+  padding: 0 12px 10px 12px;
+}
+
+.filter-tab-btn {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  padding: 6px 3px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  color: var(--text-muted);
+}
+
+.filter-tab-btn:hover {
+  background: #1c1c22;
+  color: var(--text-primary);
+  border-color: #3f3f46;
+}
+
+.filter-tab-btn .filter-tab-label {
+  font-size: 0.72rem;
+  font-weight: 700;
+  white-space: nowrap;
+  line-height: 1.1;
+}
+
+.filter-tab-btn .filter-tab-count {
+  font-size: 0.68rem;
+  font-family: var(--font-mono);
+  background: rgba(255, 255, 255, 0.06);
+  padding: 1px 7px;
+  border-radius: 9999px;
+  line-height: 1.2;
+}
+
+.filter-tab-btn.active-all {
+  background: rgba(99, 102, 241, 0.15);
+  border-color: rgba(99, 102, 241, 0.5);
+  color: #a5b4fc;
+}
+
+.filter-tab-btn.active-all .filter-tab-count {
+  background: rgba(99, 102, 241, 0.25);
+  color: #c7d2fe;
+}
+
+.filter-tab-btn.active-explicit {
+  background: rgba(56, 189, 248, 0.15);
+  border-color: rgba(56, 189, 248, 0.5);
+  color: #7dd3fc;
+}
+
+.filter-tab-btn.active-explicit .filter-tab-count {
+  background: rgba(56, 189, 248, 0.25);
+  color: #bae6fd;
+}
+
+.filter-tab-btn.active-ambiguous {
+  background: rgba(245, 158, 11, 0.15);
+  border-color: rgba(245, 158, 11, 0.5);
+  color: #fcd34d;
+}
+
+.filter-tab-btn.active-ambiguous .filter-tab-count {
+  background: rgba(245, 158, 11, 0.25);
+  color: #fde68a;
+}
+
+/* Bi-directional Text Alignment (RTL / LTR) */
+html[dir="ltr"] .sidebar {
+  border-left: none;
+  border-right: 1px solid var(--border-subtle);
+}
+
+html[dir="ltr"] .scenario-item-btn {
+  text-align: left;
+}
+
+html[dir="rtl"] .scenario-item-btn {
+  text-align: right;
+}
+
+html[dir="ltr"] .search-field {
+  padding: 7px 10px 7px 32px;
+}
+
+html[dir="ltr"] .search-icon-pos {
+  left: 22px;
+  right: auto;
+}
+
 .scenario-list {
   padding: 8px;
   display: flex;
