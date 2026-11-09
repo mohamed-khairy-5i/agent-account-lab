@@ -1,0 +1,141 @@
+{
+  "version": "0.1.0-foundation",
+  "tools": [
+    {
+      "name": "list_accounts",
+      "description_ar": "يعرض هويات الحسابات والمجلدات المتاحة؛ لا يختار حسابًا تلقائيًا.",
+      "mutating": false,
+      "input_schema": {
+        "type": "object",
+        "properties": {},
+        "required": [],
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "list_files",
+      "description_ar": "يسرد بيانات الملفات داخل حساب محدد؛ المحتوى لا يظهر في القائمة.",
+      "mutating": false,
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "account_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "folder_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "name": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "required": [
+          "account_id"
+        ],
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "read_file",
+      "description_ar": "يقرأ محتوى ملف من حساب محدد فقط.",
+      "mutating": false,
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "account_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "file_id": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "required": [
+          "account_id",
+          "file_id"
+        ],
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "rename_file",
+      "description_ar": "يغير اسم ملف وهمي داخل حسابه؛ لا يصل إلى ملفات الجهاز.",
+      "mutating": true,
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "account_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "file_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "new_name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 120,
+            "pattern": "^[^/\\\\\\u0000]+$"
+          }
+        },
+        "required": [
+          "account_id",
+          "file_id",
+          "new_name"
+        ],
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "move_file",
+      "description_ar": "ينقل ملفًا وهميًا بين مجلدات الحساب نفسه فقط.",
+      "mutating": true,
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "account_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "file_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "target_folder_id": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "required": [
+          "account_id",
+          "file_id",
+          "target_folder_id"
+        ],
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "ask_user",
+      "description_ar": "يطلب توضيحًا من مستخدم محاكى؛ الرد معرف مسبقًا ولا يكشف الإجابة قبل السؤال.",
+      "mutating": false,
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "question": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "required": [
+          "question"
+        ],
+        "additionalProperties": false
+      }
+    }
+  ]
+}
