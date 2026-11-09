@@ -1,7 +1,7 @@
 import React from 'react';
 import type { Scenario, TestCase } from '../../../src/types.ts';
-import type { AgentChoice } from '../engine.ts';
-import { PlayIcon, RefreshIcon } from './Icons.tsx';
+import { type AgentChoice, isLiveLLM } from '../engine.ts';
+import { PlayIcon, RefreshIcon, KeyIcon, AlertTriangleIcon } from './Icons.tsx';
 import { useLanguage } from '../i18n.tsx';
 
 interface ScenarioViewerProps {
@@ -14,6 +14,8 @@ interface ScenarioViewerProps {
   onRun: () => void;
   isRunning: boolean;
   onQuickCompare: () => void;
+  hasApiKey: boolean;
+  onOpenApiKeyModal: () => void;
 }
 
 const VARIANT_NAMES: Record<string, { ar: string; en: string }> = {
@@ -33,11 +35,14 @@ export const ScenarioViewer: React.FC<ScenarioViewerProps> = ({
   onAgentChange,
   onRun,
   isRunning,
-  onQuickCompare
+  onQuickCompare,
+  hasApiKey,
+  onOpenApiKeyModal
 }) => {
   const { lang, t, getScenarioTitle, getScenarioPrompt } = useLanguage();
   const title = getScenarioTitle(scenario.id, scenario.title_ar);
   const prompt = getScenarioPrompt(scenario.id, scenario.messages[0]?.content || '');
+  const needsApiKey = isLiveLLM(selectedAgent) && !hasApiKey;
 
   return (
     <div className="ui-card">
@@ -111,7 +116,7 @@ export const ScenarioViewer: React.FC<ScenarioViewerProps> = ({
 
           <button 
             className="btn btn-primary-action"
-            onClick={onRun}
+            onClick={needsApiKey ? onOpenApiKeyModal : onRun}
             disabled={isRunning}
           >
             <PlayIcon size={12} color="#fff" />
@@ -119,6 +124,26 @@ export const ScenarioViewer: React.FC<ScenarioViewerProps> = ({
           </button>
         </div>
       </div>
+
+      {needsApiKey && (
+        <div className="api-key-warning-banner">
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <AlertTriangleIcon size={16} color="#f59e0b" />
+            <span style={{ fontSize: '0.8rem', color: '#fef3c7' }}>
+              {t.api_key_banner_warning}
+            </span>
+          </div>
+          <button
+            type="button"
+            className="btn btn-secondary-action"
+            onClick={onOpenApiKeyModal}
+            style={{ padding: '4px 10px', fontSize: '0.75rem', gap: '5px' }}
+          >
+            <KeyIcon size={12} color="#f59e0b" />
+            <span>{t.api_key_banner_btn}</span>
+          </button>
+        </div>
+      )}
     </div>
   );
 };

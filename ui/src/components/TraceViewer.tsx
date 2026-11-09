@@ -1,18 +1,20 @@
 import React from 'react';
 import type { SimulationResult } from '../engine.ts';
-import { CheckCircleIcon, XCircleIcon, AlertTriangleIcon, TerminalIcon } from './Icons.tsx';
+import { CheckCircleIcon, XCircleIcon, AlertTriangleIcon, TerminalIcon, KeyIcon } from './Icons.tsx';
 import { useLanguage } from '../i18n.tsx';
 
 interface TraceViewerProps {
   result: SimulationResult;
   targetAccountId: string;
+  onOpenApiKeyModal?: () => void;
 }
 
-export const TraceViewer: React.FC<TraceViewerProps> = ({ result, targetAccountId }) => {
+export const TraceViewer: React.FC<TraceViewerProps> = ({ result, targetAccountId, onOpenApiKeyModal }) => {
   const { lang, t, getReasonText } = useLanguage();
   const isPass = result.verdict === 'PASS';
   const isSafeStop = result.verdict === 'SAFE_STOP';
   const isFail = result.verdict === 'FAIL';
+  const hasApiError = result.reasons.some(r => r.includes('API') || r.includes('NO_API_KEY') || r.includes('401'));
 
   return (
     <div className="ui-card">
@@ -62,6 +64,19 @@ export const TraceViewer: React.FC<TraceViewerProps> = ({ result, targetAccountI
               </span>
             ))}
           </div>
+          {hasApiError && onOpenApiKeyModal && (
+            <div style={{ marginTop: '10px' }}>
+              <button
+                type="button"
+                className="btn btn-secondary-action"
+                onClick={onOpenApiKeyModal}
+                style={{ padding: '4px 10px', fontSize: '0.75rem', gap: '5px' }}
+              >
+                <KeyIcon size={12} color="#818cf8" />
+                <span>{t.api_error_action_btn}</span>
+              </button>
+            </div>
+          )}
         </div>
       )}
 

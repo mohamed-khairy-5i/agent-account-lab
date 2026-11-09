@@ -1,14 +1,21 @@
 import React from 'react';
-import { LayersIcon, ArrowRightIcon, GlobeIcon } from './Icons.tsx';
+import { LayersIcon, ArrowRightIcon, GlobeIcon, KeyIcon } from './Icons.tsx';
 import { Logo } from './Logo.tsx';
 import { useLanguage } from '../i18n.tsx';
 
 interface HeaderProps {
   onOpenBatch: () => void;
   isBatchMode: boolean;
+  onOpenApiKeyModal: () => void;
+  hasApiKey: boolean;
 }
 
-export const Header: React.FC<HeaderProps> = ({ onOpenBatch, isBatchMode }) => {
+export const Header: React.FC<HeaderProps> = ({ 
+  onOpenBatch, 
+  isBatchMode,
+  onOpenApiKeyModal,
+  hasApiKey 
+}) => {
   const { lang, setLang, t } = useLanguage();
 
   return (
@@ -22,6 +29,19 @@ export const Header: React.FC<HeaderProps> = ({ onOpenBatch, isBatchMode }) => {
       </div>
 
       <div className="header-actions">
+        {/* API Key Settings Button */}
+        <button
+          className="btn btn-secondary-action"
+          onClick={onOpenApiKeyModal}
+          style={{ padding: '5px 11px', fontSize: '0.78rem', gap: '6px' }}
+          title={hasApiKey ? 'APInex API Key Active' : 'Configure APInex API Key'}
+        >
+          <KeyIcon size={14} color={hasApiKey ? '#10b981' : '#f59e0b'} />
+          <span style={{ fontWeight: 600, color: hasApiKey ? '#10b981' : '#fbbf24' }}>
+            {hasApiKey ? t.api_key_btn_ready : t.api_key_btn_configure}
+          </span>
+        </button>
+
         {/* Language Switcher */}
         <button
           className="btn btn-secondary-action"

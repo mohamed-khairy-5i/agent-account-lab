@@ -16,6 +16,18 @@ export type AgentChoice =
   | 'qwen-3.8-max'
   | 'gemini-3.8-flash';
 
+export const LIVE_LLM_MODELS: AgentChoice[] = [
+  'glm-5.3-flash',
+  'kimi-k3',
+  'deepseek-v4.1-flash',
+  'qwen-3.8-max',
+  'gemini-3.8-flash'
+];
+
+export function isLiveLLM(agent: AgentChoice): boolean {
+  return LIVE_LLM_MODELS.includes(agent);
+}
+
 export interface SimulationResult {
   case_id: string;
   base_id: string;
@@ -59,7 +71,12 @@ export class SimulationHarness {
   }
 
   async runSingle(testCase: TestCase, agentChoice: AgentChoice, apiKey?: string): Promise<SimulationResult> {
-    const key = apiKey || localStorage.getItem('APINEX_API_KEY') || 'sk-apx3a50bf4e9bd5c0bf38c3a6be05cb5f84869ef0c00370f9b';
+    const key = (apiKey || (typeof localStorage !== 'undefined' ? localStorage.getItem('APINEX_API_KEY') : '') || '').trim();
+    const customBaseURL = (typeof localStorage !== 'undefined' ? localStorage.getItem('APINEX_BASE_URL') : '') || '/api/llm';
+
+    if (isLiveLLM(agentChoice) && !key) {
+      throw new Error('NO_API_KEY_CONFIGURED');
+    }
 
     let adapter;
     if (agentChoice === 'oracle-reference') {
@@ -70,7 +87,7 @@ export class SimulationHarness {
       adapter = makeOpenAICompatibleAdapter({
         name: 'GLM-5.3 Flash (Live)',
         apiKey: key,
-        baseURL: '/api/llm',
+        baseURL: customBaseURL,
         model: 'free/glm-5.3-flash',
         temperature: 0
       });
@@ -78,7 +95,7 @@ export class SimulationHarness {
       adapter = makeOpenAICompatibleAdapter({
         name: 'Kimi K3 (Live)',
         apiKey: key,
-        baseURL: '/api/llm',
+        baseURL: customBaseURL,
         model: 'free/kimi-k3',
         temperature: 0
       });
@@ -86,7 +103,7 @@ export class SimulationHarness {
       adapter = makeOpenAICompatibleAdapter({
         name: 'DeepSeek V4.1 Flash (Live)',
         apiKey: key,
-        baseURL: '/api/llm',
+        baseURL: customBaseURL,
         model: 'free/deepseek-v4.1-flash',
         temperature: 0
       });
@@ -94,7 +111,7 @@ export class SimulationHarness {
       adapter = makeOpenAICompatibleAdapter({
         name: 'Qwen 3.8 MAX (Live)',
         apiKey: key,
-        baseURL: '/api/llm',
+        baseURL: customBaseURL,
         model: 'free/qwen-3.8-max',
         temperature: 0
       });
@@ -102,7 +119,7 @@ export class SimulationHarness {
       adapter = makeOpenAICompatibleAdapter({
         name: 'Gemini 3.8 Flash (Live)',
         apiKey: key,
-        baseURL: '/api/llm',
+        baseURL: customBaseURL,
         model: 'free/gemini-3.8-flash',
         temperature: 0
       });

@@ -182,7 +182,27 @@ const UI_STRINGS: Record<Language, Record<string, string>> = {
     status_renamed: 'تم تعديل اسمه',
     status_moved: 'تم نقله',
     status_wrongly_modified: 'تعديل خاطئ!',
-    lang_toggle_btn: 'English'
+    lang_toggle_btn: 'English',
+    api_key_btn_ready: 'مفتاح API مفعّل',
+    api_key_btn_configure: 'إعداد مفتاح API',
+    api_key_modal_title: 'إعدادات مفتاح الذكاء الاصطناعي (Frontier LLM API)',
+    api_key_modal_sub: 'تتيح لك تجربة وتقييم نماذج الذكاء الاصطناعي الحية (GLM, Kimi, DeepSeek, Qwen, Gemini) مباشرة من متصفحك.',
+    api_key_security_notice: 'يتم تخزين المفتاح محلياً في متصفحك فقط (localStorage). لا يتم إرساله لأي خوادم خارجية ولا يتم حفظه في الكود المصدري.',
+    api_key_input_label: 'مفتاح APInex / OpenAI-Compatible API Key:',
+    api_key_input_placeholder: 'أدخل المفتاح هنا (مثال: sk-apx...)',
+    api_key_endpoint_label: 'مسار نقطة النهاية (Endpoint Proxy / Base URL):',
+    api_key_endpoint_hint: 'افتراضياً يوجه إلى /api/llm عبر وكيل Vite المحلي لتفادي مشاكل CORS.',
+    api_key_save_btn: 'حفظ الإعدادات',
+    api_key_remove_btn: 'حذف المفتاح',
+    api_key_cancel_btn: 'إغلاق',
+    api_key_configured_badge: 'المفتاح مخزّن ومفعّل محلياً',
+    api_key_missing_badge: 'لم يتم تعيين مفتاح بعد',
+    api_key_banner_warning: 'يتطلب هذا النموذج مفتاح APInex لتشغيله وتقييمه مباشرة.',
+    api_key_banner_btn: 'إدخال المفتاح',
+    api_error_title: 'خطأ في استدعاء نموذج الذكاء الاصطناعي',
+    api_error_unauthorized: 'فشل المصادقة (401 Unauthorized): المفتاح غير صحيح أو انتهت صلاحيته.',
+    api_error_missing: 'يرجى إدخال مفتاح API أولاً لتشغيل هذا النموذج الحي.',
+    api_error_action_btn: 'تعديل مفتاح API'
   },
   en: {
     brand_title: 'Agent Account Lab',
@@ -245,7 +265,27 @@ const UI_STRINGS: Record<Language, Record<string, string>> = {
     status_renamed: 'Renamed',
     status_moved: 'Moved',
     status_wrongly_modified: 'Wrong Mutation!',
-    lang_toggle_btn: 'العربية'
+    lang_toggle_btn: 'العربية',
+    api_key_btn_ready: 'API Key Ready',
+    api_key_btn_configure: 'Set API Key',
+    api_key_modal_title: 'Frontier LLM API Key Settings',
+    api_key_modal_sub: 'Enables live evaluation of Frontier AI models (GLM, Kimi, DeepSeek, Qwen, Gemini) directly from your browser.',
+    api_key_security_notice: 'Your API key is stored strictly on your local browser (localStorage). It is never sent to any external server or saved in source code.',
+    api_key_input_label: 'APInex / OpenAI-Compatible API Key:',
+    api_key_input_placeholder: 'Enter API key here (e.g. sk-apx...)',
+    api_key_endpoint_label: 'Custom Endpoint / Base URL:',
+    api_key_endpoint_hint: 'Defaults to /api/llm via Vite local dev proxy to avoid browser CORS issues.',
+    api_key_save_btn: 'Save Settings',
+    api_key_remove_btn: 'Remove Key',
+    api_key_cancel_btn: 'Close',
+    api_key_configured_badge: 'API Key Configured Locally',
+    api_key_missing_badge: 'No API Key Configured',
+    api_key_banner_warning: 'This live model requires an APInex API key to run evaluations.',
+    api_key_banner_btn: 'Configure Key',
+    api_error_title: 'Frontier Model API Execution Error',
+    api_error_unauthorized: 'Authentication Failed (401 Unauthorized): Invalid or expired API key.',
+    api_error_missing: 'Please configure your API key first to evaluate this live model.',
+    api_error_action_btn: 'Configure API Key'
   }
 };
 
@@ -290,6 +330,16 @@ export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   };
 
   const getReasonText = (code: string) => {
+    if (code.startsWith('execution_error:')) {
+      const err = code.replace('execution_error:', '');
+      if (err.includes('401') || err.includes('NO_API_KEY_CONFIGURED')) {
+        return lang === 'ar' 
+          ? 'خطأ مصادقة: مفتاح الـ API غير صالح أو غير موجود' 
+          : 'API Auth Error: Missing or invalid API key';
+      }
+      return `${lang === 'ar' ? 'خطأ تشغيل: ' : 'Execution Error: '}${err}`;
+    }
+
     const item = REASONS_MAP[code];
     if (item) {
       return item[lang];

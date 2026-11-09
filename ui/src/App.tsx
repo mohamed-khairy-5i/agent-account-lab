@@ -1,11 +1,12 @@
 import { useState, useEffect, useMemo, useTransition } from 'react';
-import { SimulationHarness, type AgentChoice, type SimulationResult } from './engine.ts';
+import { SimulationHarness, type AgentChoice, type SimulationResult, isLiveLLM } from './engine.ts';
 import { Header } from './components/Header.tsx';
 import { ScenarioSidebar } from './components/ScenarioSidebar.tsx';
 import { ScenarioViewer } from './components/ScenarioViewer.tsx';
 import { TraceViewer } from './components/TraceViewer.tsx';
 import { WorldDiffViewer } from './components/WorldDiffViewer.tsx';
 import { BatchOverview } from './components/BatchOverview.tsx';
+import { ApiKeyModal } from './components/ApiKeyModal.tsx';
 
 export function App() {
   const harness = useMemo(() => new SimulationHarness(), []);
@@ -17,6 +18,11 @@ export function App() {
   const [result, setResult] = useState<SimulationResult | null>(null);
   const [isRunning, setIsRunning] = useState<boolean>(false);
   const [isBatchMode, setIsBatchMode] = useState<boolean>(false);
+  const [isApiKeyModalOpen, setIsApiKeyModalOpen] = useState<boolean>(false);
+  const [hasApiKey, setHasApiKey] = useState<boolean>(() => {
+    if (typeof localStorage === 'undefined') return false;
+    return !!(localStorage.getItem('APINEX_API_KEY') || '').trim();
+  });
   const [, startTransition] = useTransition();
 
   const currentScenario = useMemo(() => {
@@ -37,6 +43,12 @@ export function App() {
     try {
       const res = await harness.runSingle(targetCase, agent);
       setResult(res);
+    } catch (err: any) {
+      if (err.message === 'NO_API_KEY_CONFIGURED') {
+        setIsApiKeyModalOpen(true);
+      } else {
+        console.error('Simulation error:', err);
+      }
     } finally {
       setIsRunning(false);
     }
@@ -66,11 +78,20 @@ export function App() {
     }
   };
 
+  const handleKeySaved = (key: string) => {
+    setHasApiKey(!!key.trim());
+    if (key.trim() && isLiveLLM(selectedAgent)) {
+      runSimulation(currentCase, selectedAgent);
+    }
+  };
+
   return (
     <div className="app-container">
       <Header 
         onOpenBatch={() => setIsBatchMode(!isBatchMode)}
         isBatchMode={isBatchMode}
+        onOpenApiKeyModal={() => setIsApiKeyModalOpen(true)}
+        hasApiKey={hasApiKey}
       />
 
       {isBatchMode ? (
@@ -99,6 +120,8 @@ export function App() {
                   onRun={() => runSimulation()}
                   isRunning={isRunning}
                   onQuickCompare={handleQuickCompare}
+                  hasApiKey={hasApiKey}
+                  onOpenApiKeyModal={() => setIsApiKeyModalOpen(true)}
                 />
 
                 {result && (
@@ -106,6 +129,7 @@ export function App() {
                     <TraceViewer 
                       result={result}
                       targetAccountId={currentScenario.oracle.target_account_id}
+                      onOpenApiKeyModal={() => setIsApiKeyModalOpen(true)}
                     />
 
                     <WorldDiffViewer 
@@ -120,6 +144,12 @@ export function App() {
           </main>
         </div>
       )}
+
+      <ApiKeyModal 
+        isOpen={isApiKeyModalOpen}
+        onClose={() => setIsApiKeyModalOpen(false)}
+        onKeySaved={handleKeySaved}
+      />
     </div>
   );
 }
