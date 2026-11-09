@@ -13,6 +13,8 @@
     "validate": "node scripts/validate.ts",
     "demo": "node scripts/demo.ts",
     "check-all": "node scripts/validate.ts && tsc --noEmit && node --test tests/core.test.ts",
+    "benchmark:live": "node scripts/benchmark-live.ts",
+    "benchmark:models": "node scripts/multi-model-benchmark.ts",
     "ui": "npm --prefix ui run dev",
     "ui:build": "npm --prefix ui run build",
     "ui:preview": "npm --prefix ui run preview"

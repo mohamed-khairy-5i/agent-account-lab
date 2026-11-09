@@ -78,7 +78,7 @@ for (let i = 0; i < selectedCases.length; i++) {
     const icon = res.verdict === 'PASS' ? '✅' : (res.verdict === 'SAFE_STOP' ? '⏸️' : '❌');
     console.log(`  Result: ${icon} ${res.verdict} (${duration}s, ${res.metrics.tool_calls} tool calls)`);
     if (res.reasons.length > 0) console.log(`  Reasons: ${JSON.stringify(res.reasons)}`);
-  } catch (err) {
+  } catch (err: any) {
     console.log(`  Execution Error: ${err.message}`);
     benchmarkResults.push({
       case_id: tc.case_id,
@@ -102,7 +102,7 @@ const total = benchmarkResults.length;
 const pass = benchmarkResults.filter(r => r.verdict === 'PASS').length;
 const safeStop = benchmarkResults.filter(r => r.verdict === 'SAFE_STOP').length;
 const fail = benchmarkResults.filter(r => r.verdict === 'FAIL').length;
-const wrongWrites = benchmarkResults.filter(r => r.mistargeted_writes > 0).length;
+const wrongWrites = benchmarkResults.filter(r => ((r as any).mistargeted_writes || 0) > 0).length;
 
 const summary = {
   model,

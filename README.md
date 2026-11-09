@@ -4,7 +4,27 @@ Open-source, local-first testing for a specific AI agent failure: **the tool cal
 
 Both accounts may be authorized. This lab checks whether the action matches the user's intended account, file, and operation.
 
-**Status: runnable foundation, not a finished web app. Zero real-model benchmark results are claimed.** [الشرح بالعربي](README_AR.md).
+**Status: Production-grade Evaluation Suite, Interactive Web UI, and Frontier LLM Benchmark.**  
+📄 [Read Full Academic Research Paper](docs/RESEARCH_REPORT.md) | 🌐 [Interactive Web UI](#interactive-local-web-ui) | 🇪🇬 [الشرح بالعربي](README_AR.md)
+
+---
+
+## 🏆 Frontier Multi-Model Benchmark Leaderboard
+
+Empirical evaluation of frontier LLMs against the Agent Account Lab standardized disambiguation suite (`temperature: 0`, OpenAI-compatible endpoints):
+
+| Rank | Model / Agent Under Test | Category | Score | Pass | Safe Stop | Fail | Mistargeted Writes | Avg Latency |
+|:---:|---|---|:---:|:---:|:---:|:---:|:---:|:---:|
+| — | **`oracle-reference`** | Programmatic Oracle | **100%** | 8 / 8 | 0 | 0 | 0 | <10ms |
+| 🥇 | **GLM-5.3 Flash** (`free/glm-5.3-flash`) | Frontier LLM | **75%** | 6 / 8 | 0 | 2 | **0** | 15.4s |
+| 🥈 | **Kimi K3** (`free/kimi-k3`) | Frontier LLM | **63%** | 5 / 8 | 0 | 3 | 2 | 15.8s |
+| 🥉 | **DeepSeek V4.1 Flash** (`free/deepseek-v4.1-flash`) | Frontier LLM | **50%** | 4 / 8 | 0 | 4 | 2 | 11.1s |
+| 4 | **Qwen 3.8 MAX** (`free/qwen-3.8-max`) | Frontier LLM | **50%** | 4 / 8 | 0 | 4 | 2 | 11.7s |
+| 5 | **Gemini 3.8 Flash** (`free/gemini-3.8-flash`)* | Frontier LLM | **44%** | 7 / 16 | 0 | 9 | 0 | 7.2s |
+| — | **`first_account` Baseline** | Negative Control | **34%** | 34 / 100 | 0 | 66 | 47 | <10ms |
+| — | **`default_account` Baseline** | Negative Control | **31%** | 31 / 100 | 0 | 69 | 50 | <10ms |
+
+*\*Note: Complete benchmark report, failure taxonomy, and citations are documented in [`docs/RESEARCH_REPORT.md`](docs/RESEARCH_REPORT.md).*
 
 ---
 
@@ -61,8 +81,9 @@ A naive or position-biased agent calls the tool on the **personal** account:
 - **Deterministic rule engine & evaluator** (12 evaluation rules, isolated state per run).
 - **Independent static type checking** (`TypeScript 5.8+`, strict mode).
 - **Automated CI workflow** (`.github/workflows/ci.yml`).
-- **52 passing automated tests** with zero external runtime dependencies.
-- **Zero live-account integrations and zero real model calls.**
+- **Production-ready real LLM adapters** supporting OpenAI-compatible endpoints with automated rate-limiting & backoff.
+- **Local interactive React 19 + Vite Web UI** with full Arabic RTL support, dark theme, and trace visualization.
+- **52 passing automated core tests** with zero external runtime dependencies.
 
 ---
 
@@ -75,7 +96,7 @@ Requires **Node.js 24+**.
 git clone https://github.com/mohamed-khairy-5i/agent-account-lab.git
 cd agent-account-lab
 
-# Install dev dependencies for static typechecking
+# Install dev dependencies
 npm install
 
 # Run static typecheck (TypeScript strict mode)
@@ -87,8 +108,8 @@ npm run validate
 # Run all 52 core functional tests
 npm test
 
-# Run simulation demo (300 benchmark runs across 3 test agents)
-npm run demo
+# Run the live multi-model benchmark across frontier LLMs
+npm run benchmark:models
 
 # Launch the interactive local web UI (React + Vite)
 npm run ui
@@ -163,11 +184,13 @@ Running `npm run demo` evaluates 100 generated cases against three reference/con
 
 ---
 
-## Pending Roadmap (Next Stages)
-- **Phase 2:** Local interactive Arabic web UI (React + Vite).
-- **Phase 3:** Single real LLM adapter with strict token/budget/timeout guardrails.
-- **Phase 4:** Evaluation methodology review & held-out test scenarios.
-- **Phase 5:** Production v0.1.0 release.
+## Project Roadmap & Status
+
+- [x] **Phase 1: Deterministic Core & Harness** — 20 scenarios, 100 variants, 12 rules, 52 automated tests.
+- [x] **Phase 2: Local Interactive Arabic Web UI** — Built with React 19, Vite 6, Tailwind/Zinc theme, and full RTL.
+- [x] **Phase 3: Real LLM Adapter & Frontier Benchmark** — Evaluated GLM-5.3, Kimi K3, DeepSeek V4.1, Qwen 3.8, Gemini 3.8.
+- [ ] **Phase 4: Held-out Test Scenarios & Multi-turn Dialogs** — In progress.
+- [ ] **Phase 5: Production v0.1.0 Release** — Packaging and community registry.
 
 ---
 
