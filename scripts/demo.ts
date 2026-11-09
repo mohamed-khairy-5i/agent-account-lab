@@ -5,7 +5,7 @@ import { runCase } from '../src/runner.ts';
 import { makeOracleReference } from '../src/reference.ts';
 import { makeNaiveBaseline } from '../src/baselines.ts';
 const cases=generateCases(loadScenarios()),tools=loadTools(),max=loadRules().max_tool_calls;
-const rows=[];
+const rows: Awaited<ReturnType<typeof runCase>>[] = [];
 for(const c of cases) {
   rows.push(await runCase(c,makeOracleReference(c.scenario),tools,max));
   rows.push(await runCase(c,makeNaiveBaseline('first_account'),tools,max));

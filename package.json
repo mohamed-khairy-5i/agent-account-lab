@@ -9,8 +9,17 @@
   },
   "scripts": {
     "test": "node --test tests/core.test.ts",
+    "typecheck": "tsc --noEmit",
     "validate": "node scripts/validate.ts",
-    "demo": "node scripts/demo.ts"
+    "demo": "node scripts/demo.ts",
+    "check-all": "node scripts/validate.ts && tsc --noEmit && node --test tests/core.test.ts",
+    "ui": "npm --prefix ui run dev",
+    "ui:build": "npm --prefix ui run build",
+    "ui:preview": "npm --prefix ui run preview"
   },
-  "license": "MIT"
+  "license": "MIT",
+  "devDependencies": {
+    "@types/node": "^22.13.10",
+    "typescript": "^5.8.2"
+  }
 }

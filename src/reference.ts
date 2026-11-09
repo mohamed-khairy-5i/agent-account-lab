@@ -2,7 +2,7 @@
 import type { AgentAdapter, Scenario } from './types.ts';
 export function makeOracleReference(scenario: Scenario): AgentAdapter {
   const o=structuredClone(scenario.oracle);
-  return {name:'oracle-reference',kind:'oracle_reference',async run(context,call) {
+  return {name:'oracle-reference',kind:'oracle_reference',async run(_context,call) {
     call('list_accounts',{});
     if (o.require_clarification) {
       const response=call('ask_user',{question:'أنهي حساب تقصد: الشغل ولا الشخصي؟'});
