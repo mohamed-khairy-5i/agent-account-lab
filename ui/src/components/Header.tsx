@@ -1,5 +1,6 @@
 import React from 'react';
-import { BeakerIcon, LayersIcon, ArrowRightIcon } from './Icons.tsx';
+import { LayersIcon, ArrowRightIcon } from './Icons.tsx';
+import { Logo } from './Logo.tsx';
 
 interface HeaderProps {
   onOpenBatch: () => void;
@@ -10,9 +11,7 @@ export const Header: React.FC<HeaderProps> = ({ onOpenBatch, isBatchMode }) => {
   return (
     <header className="app-header">
       <div className="brand-wrapper">
-        <div className="brand-badge">
-          <BeakerIcon size={17} color="#a5b4fc" />
-        </div>
+        <Logo size={32} withGlow={true} />
         <div className="brand-title">
           <h1>Agent Account Lab</h1>
           <span>حساب مين؟</span>

@@ -79,9 +79,12 @@ export const ScenarioViewer: React.FC<ScenarioViewerProps> = ({
             value={selectedAgent}
             onChange={(e) => onAgentChange(e.target.value as AgentChoice)}
           >
-            <optgroup label="⚡ نماذج ذكاء اصطناعي حقيقية (Live API)">
-              <option value="gemini-3.8-flash">✨ Gemini 3.8 Flash (Live)</option>
-              <option value="deepseek-v4.1-flash">⚡ DeepSeek V4.1 Flash (Live)</option>
+            <optgroup label="⚡ نماذج ذكاء اصطناعي حقيقية (Live Frontier APIs)">
+              <option value="glm-5.3-flash">🥇 GLM-5.3 Flash (75% Score — متصدر التقييم)</option>
+              <option value="kimi-k3">🥈 Kimi K3 (63% Score)</option>
+              <option value="deepseek-v4.1-flash">🥉 DeepSeek V4.1 Flash (50% Score)</option>
+              <option value="qwen-3.8-max">⚡ Qwen 3.8 MAX (50% Score)</option>
+              <option value="gemini-3.8-flash">✨ Gemini 3.8 Flash (44% Score)</option>
             </optgroup>
             <optgroup label="🛠️ ضوابط ومرجع المختبر (Scripted Controls)">
               <option value="first_account">ضابط سلبي: أول حساب (First Account)</option>

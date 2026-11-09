@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="logo.png" width="160" alt="Agent Account Lab Logo" style="border-radius: 24px;" />
+</p>
+
 # Agent Account Lab — «حساب مين؟»
 
 مختبر مفتوح المصدر ومحلي بالكامل (Local-First) لاختبار نوع دقيق وخفي من أخطاء وكلاء الذكاء الاصطناعي (AI Agents): **استدعاء الأداة ينجح تقنيًا، لكنه ينفذ التعديل في الحساب الخطأ**.

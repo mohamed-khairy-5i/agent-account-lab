@@ -10,8 +10,11 @@ export type AgentChoice =
   | 'oracle-reference' 
   | 'first_account' 
   | 'default_account'
-  | 'gemini-3.8-flash'
-  | 'deepseek-v4.1-flash';
+  | 'glm-5.3-flash'
+  | 'kimi-k3'
+  | 'deepseek-v4.1-flash'
+  | 'qwen-3.8-max'
+  | 'gemini-3.8-flash';
 
 export interface SimulationResult {
   case_id: string;
@@ -63,12 +66,20 @@ export class SimulationHarness {
       adapter = makeOracleReference(testCase.scenario);
     } else if (agentChoice === 'first_account' || agentChoice === 'default_account') {
       adapter = makeNaiveBaseline(agentChoice);
-    } else if (agentChoice === 'gemini-3.8-flash') {
+    } else if (agentChoice === 'glm-5.3-flash') {
       adapter = makeOpenAICompatibleAdapter({
-        name: 'Gemini 3.8 Flash (Live)',
+        name: 'GLM-5.3 Flash (Live)',
         apiKey: key,
         baseURL: '/api/llm',
-        model: 'free/gemini-3.8-flash',
+        model: 'free/glm-5.3-flash',
+        temperature: 0
+      });
+    } else if (agentChoice === 'kimi-k3') {
+      adapter = makeOpenAICompatibleAdapter({
+        name: 'Kimi K3 (Live)',
+        apiKey: key,
+        baseURL: '/api/llm',
+        model: 'free/kimi-k3',
         temperature: 0
       });
     } else if (agentChoice === 'deepseek-v4.1-flash') {
@@ -77,6 +88,22 @@ export class SimulationHarness {
         apiKey: key,
         baseURL: '/api/llm',
         model: 'free/deepseek-v4.1-flash',
+        temperature: 0
+      });
+    } else if (agentChoice === 'qwen-3.8-max') {
+      adapter = makeOpenAICompatibleAdapter({
+        name: 'Qwen 3.8 MAX (Live)',
+        apiKey: key,
+        baseURL: '/api/llm',
+        model: 'free/qwen-3.8-max',
+        temperature: 0
+      });
+    } else if (agentChoice === 'gemini-3.8-flash') {
+      adapter = makeOpenAICompatibleAdapter({
+        name: 'Gemini 3.8 Flash (Live)',
+        apiKey: key,
+        baseURL: '/api/llm',
+        model: 'free/gemini-3.8-flash',
         temperature: 0
       });
     } else {

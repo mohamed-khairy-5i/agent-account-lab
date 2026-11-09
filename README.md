@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="logo.png" width="160" alt="Agent Account Lab Logo" style="border-radius: 24px;" />
+</p>
+
 # Agent Account Lab — AI Agent Multi-Account Testing
 
 Open-source, local-first testing for a specific AI agent failure: **the tool call succeeds, but it acts in the wrong account**.

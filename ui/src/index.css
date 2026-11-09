@@ -178,6 +178,12 @@ code, pre, .font-mono {
   border-color: var(--accent-amber-border);
 }
 
+.pill-indigo {
+  background: var(--accent-indigo-subtle);
+  color: #a5b4fc;
+  border-color: rgba(99, 102, 241, 0.35);
+}
+
 .status-dot {
   width: 6px;
   height: 6px;
@@ -408,7 +414,15 @@ code, pre, .font-mono {
   font-weight: 600;
   cursor: pointer;
   border: 1px solid transparent;
-  transition: all 0.15s ease;
+  transition: background-color 0.15s ease, border-color 0.15s ease, transform 0.1s cubic-bezier(0.2, 0, 0, 1), box-shadow 0.15s ease;
+}
+
+.btn:active {
+  transform: scale(0.96);
+}
+
+.font-mono, .stat-value, .run-time, .status-count {
+  font-variant-numeric: tabular-nums;
 }
 
 .btn-primary-action {
