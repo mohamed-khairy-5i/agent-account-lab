@@ -206,9 +206,9 @@ Running `npm run demo` evaluates 100 generated cases against three reference/con
 
 - [x] **Phase 1: Deterministic Core & Harness** — 20 scenarios, 100 variants, 12 rules, 52 automated tests.
 - [x] **Phase 2: Local Interactive Arabic Web UI** — Built with React 19, Vite 6, Tailwind/Zinc theme, and full RTL.
-- [x] **Phase 3: Real LLM Adapter & Frontier Benchmark** — Evaluated GLM-5.3, Kimi K3, DeepSeek V4.1, Qwen 3.8, Gemini 3.8.
-- [ ] **Phase 4: Held-out Test Scenarios & Multi-turn Dialogs** — In progress.
-- [ ] **Phase 5: Production v0.1.0 Release** — Packaging and community registry.
+- [x] **Phase 3: Real LLM Adapter & Multi-Model Benchmark** — Evaluated GLM-5.3, Kimi K3, DeepSeek V4.1, Qwen 3.8, Gemini 3.8.
+- [x] **Phase 4: Empirical Research Paper & Leaderboard** — Published comprehensive failure taxonomy, visual statistics, and benchmark chart.
+- [x] **Phase 5: Production v1.1.0 Release** — Public release with bilingual interface, research report, visual charts, and open-source citations.
 
 ---
 
