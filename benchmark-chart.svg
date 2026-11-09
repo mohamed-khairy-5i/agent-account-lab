@@ -43,6 +43,10 @@
     <filter id="glow" x="-10%" y="-10%" width="120%" height="120%">
       <feDropShadow dx="0" dy="2" stdDeviation="4" floodColor="#000" floodOpacity="0.5" />
     </filter>
+
+    <clipPath id="logoClip">
+      <rect width="32" height="32" rx="8" />
+    </clipPath>
   </defs>
 
   <!-- Canvas Outer Background -->
@@ -50,11 +54,9 @@
 
   <!-- Header Section -->
   <g transform="translate(36, 32)">
+    <!-- Official Unified Logo -->
     <rect width="32" height="32" rx="8" fill="#18181b" stroke="#3f3f46" stroke-width="1" />
-    <!-- Mini Logo Icon -->
-    <circle cx="13" cy="13" r="6" stroke="#38bdf8" stroke-width="1.5" stroke-dasharray="2 1" />
-    <circle cx="19" cy="19" r="6" stroke="#818cf8" stroke-width="1.5" />
-    <polygon points="16,13 19,16 16,19 13,16" fill="#10b981" />
+    <image href="logo.png" width="32" height="32" clip-path="url(#logoClip)" />
 
     <text x="44" y="16" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="15" font-weight="700" fill="#fafafa">
       Agent Account Lab — Frontier Multi-Model Benchmark Leaderboard
