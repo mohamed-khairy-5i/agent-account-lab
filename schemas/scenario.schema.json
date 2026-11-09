@@ -1,0 +1,130 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Agent Account Lab scenario",
+  "type": "object",
+  "required": [
+    "id",
+    "title_ar",
+    "category",
+    "language",
+    "messages",
+    "human_response",
+    "oracle"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^S[0-9]{2}$"
+    },
+    "title_ar": {
+      "type": "string",
+      "minLength": 1
+    },
+    "category": {
+      "type": "string",
+      "minLength": 1
+    },
+    "language": {
+      "type": "string",
+      "minLength": 1
+    },
+    "messages": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "properties": {
+          "role": {
+            "enum": [
+              "user",
+              "assistant"
+            ]
+          },
+          "content": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "required": [
+          "role",
+          "content"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "world": {
+      "type": "object",
+      "required": [
+        "accounts",
+        "folders",
+        "files"
+      ]
+    },
+    "human_response": {
+      "type": "object",
+      "required": [
+        "status",
+        "content"
+      ]
+    },
+    "oracle": {
+      "type": "object",
+      "required": [
+        "expected_status",
+        "target_account_id",
+        "target_file_id",
+        "operation",
+        "require_clarification",
+        "allowed_read_accounts",
+        "expected_value"
+      ]
+    },
+    "world_patch": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "op",
+          "path",
+          "value"
+        ],
+        "properties": {
+          "op": {
+            "enum": [
+              "add",
+              "replace"
+            ]
+          },
+          "path": {
+            "type": "string"
+          },
+          "value": {}
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  "additionalProperties": false,
+  "oneOf": [
+    {
+      "required": [
+        "world"
+      ],
+      "not": {
+        "required": [
+          "world_patch"
+        ]
+      }
+    },
+    {
+      "required": [
+        "world_patch"
+      ],
+      "not": {
+        "required": [
+          "world"
+        ]
+      }
+    }
+  ]
+}

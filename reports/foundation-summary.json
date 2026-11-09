@@ -1,0 +1,40 @@
+{
+  "version": "0.1.0-foundation",
+  "synthetic_only": true,
+  "real_model_calls": 0,
+  "warning_ar": "هذه اختبارات لنواة المحاكاة ووكلاء برمجيين تجريبيين؛ ليست نتائج أداء نماذج ذكاء اصطناعي.",
+  "generated_cases": 100,
+  "runs": 300,
+  "agents": [
+    {
+      "name": "oracle-reference",
+      "kind": "oracle_reference",
+      "total": 100,
+      "pass": 95,
+      "safe_stop": 5,
+      "fail": 0,
+      "mistargeted_write_attempts": 0,
+      "mistargeted_write_effects": 0
+    },
+    {
+      "name": "first_account",
+      "kind": "deterministic_negative_control",
+      "total": 100,
+      "pass": 34,
+      "safe_stop": 0,
+      "fail": 66,
+      "mistargeted_write_attempts": 47,
+      "mistargeted_write_effects": 47
+    },
+    {
+      "name": "default_account",
+      "kind": "deterministic_negative_control",
+      "total": 100,
+      "pass": 31,
+      "safe_stop": 0,
+      "fail": 69,
+      "mistargeted_write_attempts": 50,
+      "mistargeted_write_effects": 50
+    }
+  ]
+}

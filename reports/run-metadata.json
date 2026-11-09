@@ -1,0 +1,19 @@
+{
+  "created_at_utc": "2026-11-09T05:12:33+00:00",
+  "runtime_observed": "Node.js v24.22.1",
+  "functional_tests_passed": 52,
+  "functional_tests_failed": 0,
+  "base_scenarios": 20,
+  "generated_cases": 100,
+  "mock_runs": 300,
+  "real_model_calls": 0,
+  "static_typecheck_run": false,
+  "github_modified": false,
+  "web_ui_implemented": false,
+  "notes_ar": "بيانات ونتائج مصطنعة لفحص النواة. وقت الإنشاء لا يحولها لنتائج نماذج حقيقية.",
+  "project_name": "Agent Account Lab",
+  "source_storage": "shared-world-v1",
+  "materialized_scenarios_unchanged": true,
+  "repository_created": true,
+  "publication_status": "source_upload_in_progress"
+}

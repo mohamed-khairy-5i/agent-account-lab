@@ -1,0 +1,7 @@
+{
+  "base_scenarios": 20,
+  "generated_cases": 100,
+  "mock_tools": 6,
+  "rules": 12,
+  "errors": []
+}
