@@ -196,19 +196,9 @@ Running `npm run demo` evaluates 100 generated cases against three reference/con
 - [Evaluation Rules](docs/EVALUATION_RULES_AR.md)
 - [Architecture and Plan](docs/PROJECT_PLAN_AR.md)
 - [Technical Decisions](docs/DECISIONS_AR.md)
-- [Roadmap](docs/ROADMAP_AR.md)
+- [Roadmap & Development Phases](docs/ROADMAP_AR.md)
 - [Security and Data Boundaries](docs/SECURITY_AND_DATA_AR.md)
 - [Related Work and Novelty Limits](docs/RESEARCH_BOUNDARIES_AR.md)
-
----
-
-## Project Roadmap & Status
-
-- [x] **Phase 1: Deterministic Core & Harness** — 20 scenarios, 100 variants, 12 rules, 52 automated tests.
-- [x] **Phase 2: Local Interactive Arabic Web UI** — Built with React 19, Vite 6, Tailwind/Zinc theme, and full RTL.
-- [x] **Phase 3: Real LLM Adapter & Multi-Model Benchmark** — Evaluated GLM-5.3, Kimi K3, DeepSeek V4.1, Qwen 3.8, Gemini 3.8.
-- [x] **Phase 4: Empirical Research Paper & Leaderboard** — Published comprehensive failure taxonomy, visual statistics, and benchmark chart.
-- [x] **Phase 5: Production v1.1.0 Release** — Public release with bilingual interface, research report, visual charts, and open-source citations.
 
 ---
 
