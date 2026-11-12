@@ -94,7 +94,7 @@ export const ScenarioViewer: React.FC<ScenarioViewerProps> = ({
               <option value="kimi-k3">🥈 Kimi K3 ({lang === 'ar' ? '63% - الثاني' : '63% - #2 Rank'})</option>
               <option value="deepseek-v4.1-flash">🥉 DeepSeek V4.1 Flash ({lang === 'ar' ? '50% نجاح' : '50% Score'})</option>
               <option value="qwen-3.8-max">⚡ Qwen 3.8 MAX ({lang === 'ar' ? '50% نجاح' : '50% Score'})</option>
-              <option value="gemini-3.8-flash">✨ Gemini 3.8 Flash ({lang === 'ar' ? '44% نجاح' : '44% Score'})</option>
+              <option value="gemini-3.8-flash">✨ Gemini 3.8 Flash ({lang === 'ar' ? '25% نجاح' : '25% Score'})</option>
             </optgroup>
             <optgroup label={lang === 'ar' ? '🛠️ ضوابط ومرجع المختبر (Scripted Controls)' : '🛠️ Scripted Baseline Controls'}>
               <option value="first_account">{lang === 'ar' ? 'ضابط سلبي: أول حساب (First Account)' : 'Negative Control: First Account'}</option>

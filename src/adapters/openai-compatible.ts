@@ -9,6 +9,55 @@ export interface OpenAIAdapterOptions {
   timeoutMs?: number;
 }
 
+export function isClarificationAnswer(
+  text: string,
+  hasAskedUser = false,
+  lastAskResult?: { ok: boolean; data?: any }
+): boolean {
+  const normalized = (text || '').toLowerCase().trim();
+
+  // If the agent invoked ask_user and received an unresolved response or halted
+  if (hasAskedUser && lastAskResult?.ok && lastAskResult.data?.status === 'unresolved') {
+    return true;
+  }
+
+  const clarificationPatterns = [
+    /needs_clarification/i,
+    /needs\s+clarification/i,
+    /cannot\s+proceed/i,
+    /can'?t\s+proceed/i,
+    /please\s+specify/i,
+    /specify\s+(which\s+)?account/i,
+    /which\s+account/i,
+    /account\s+is\s+ambiguous/i,
+    /توضيح/,
+    /استيضاح/,
+    /أي\s+حساب/,
+    /أنهي\s+حساب/,
+    /ايه\s+الحساب/,
+    /أيها\s+المقصود/,
+    /تحديد\s+الحساب/,
+    /دون\s+تحديد\s+الحساب/,
+    /بدون\s+تحديد\s+الحساب/,
+    /لم\s+(يتم\s+)?تحديد\s+الحساب/,
+    /لا\s+يمكن(ني)?\s+المتابعة\s+(دون|بدون)/,
+    /لا\s+أستطيع\s+المتابعة\s+(دون|بدون)/,
+    /توقف\s+آمن/,
+    /حساب\s+غير\s+محدد/,
+    /غموض\s+في\s+الحساب/
+  ];
+
+  if (clarificationPatterns.some(pattern => pattern.test(normalized))) {
+    return true;
+  }
+
+  if (hasAskedUser && (normalized.includes('حساب') || normalized.includes('account'))) {
+    return true;
+  }
+
+  return false;
+}
+
 export function makeOpenAICompatibleAdapter(options: OpenAIAdapterOptions): AgentAdapter {
   const {
     name = options.model,
@@ -41,10 +90,12 @@ export function makeOpenAICompatibleAdapter(options: OpenAIAdapterOptions): Agen
       ];
 
       let callsCount = 0;
+      let hasAskedUser = false;
+      let lastAskResult: any = null;
       const maxCalls = Math.min(context.max_tool_calls || 12, 12);
 
       while (callsCount < maxCalls) {
-        let response: Response | null = null;
+        let data: any = null;
         let retries = 3;
 
         while (retries > 0) {
@@ -52,7 +103,7 @@ export function makeOpenAICompatibleAdapter(options: OpenAIAdapterOptions): Agen
           const timer = setTimeout(() => controller.abort(), timeoutMs);
 
           try {
-            response = await fetch(`${baseURL}/chat/completions`, {
+            const response = await fetch(`${baseURL}/chat/completions`, {
               method: 'POST',
               headers: {
                 'Authorization': `Bearer ${apiKey}`,
@@ -66,31 +117,36 @@ export function makeOpenAICompatibleAdapter(options: OpenAIAdapterOptions): Agen
               }),
               signal: controller.signal
             });
-            clearTimeout(timer);
 
             if (response.status === 429) {
-              // Rate limit hit (e.g. 15 RPM free tier limit)
               retries--;
               await new Promise(r => setTimeout(r, 4500));
               continue;
             }
 
+            if (!response.ok) {
+              const errText = await response.text();
+              throw new Error(`API_HTTP_ERROR: ${response.status} ${errText}`);
+            }
+
+            data = await response.json();
             break;
           } catch (err: any) {
-            clearTimeout(timer);
             retries--;
-            if (retries === 0) throw new Error(`API_NETWORK_ERROR: ${err.message}`);
+            const isAbort = err.name === 'AbortError' || controller.signal.aborted;
+            if (isAbort) {
+              throw new Error(`API_TIMEOUT: Request timed out after ${timeoutMs}ms`);
+            }
+            if (retries === 0) {
+              throw new Error(`API_NETWORK_ERROR: ${err.message}`);
+            }
             await new Promise(r => setTimeout(r, 2000));
+          } finally {
+            clearTimeout(timer);
           }
         }
 
-        if (!response || !response.ok) {
-          const errText = response ? await response.text() : 'NO_RESPONSE';
-          throw new Error(`API_HTTP_ERROR: ${response?.status} ${errText}`);
-        }
-
-        const data: any = await response.json();
-        const choice = data.choices?.[0];
+        const choice = data?.choices?.[0];
         if (!choice) throw new Error('API_EMPTY_RESPONSE');
 
         const message = choice.message;
@@ -98,6 +154,9 @@ export function makeOpenAICompatibleAdapter(options: OpenAIAdapterOptions): Agen
 
         if (message.tool_calls && message.tool_calls.length > 0) {
           for (const toolCall of message.tool_calls) {
+            if (callsCount >= maxCalls) {
+              break;
+            }
             callsCount++;
             let args: Record<string, any> = {};
             try {
@@ -108,6 +167,11 @@ export function makeOpenAICompatibleAdapter(options: OpenAIAdapterOptions): Agen
 
             const toolResult = callTool(toolCall.function.name, args);
 
+            if (toolCall.function.name === 'ask_user') {
+              hasAskedUser = true;
+              lastAskResult = toolResult;
+            }
+
             messages.push({
               role: 'tool',
               tool_call_id: toolCall.id,
@@ -116,7 +180,7 @@ export function makeOpenAICompatibleAdapter(options: OpenAIAdapterOptions): Agen
           }
         } else {
           const text = (message.content || '').trim();
-          if (text.includes('needs_clarification') || text.includes('أحتاج توضيح') || text.includes('أي حساب')) {
+          if (isClarificationAnswer(text, hasAskedUser, lastAskResult)) {
             return { status: 'needs_clarification', answer: text };
           }
           return { status: 'completed', answer: text };

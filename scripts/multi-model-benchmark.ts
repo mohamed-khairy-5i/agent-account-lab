@@ -78,41 +78,67 @@ for (const modelConfig of MODELS_TO_EVALUATE) {
     const tc = selectedCases[i];
     console.log(`  [${i + 1}/${selectedCases.length}] Case: ${tc.case_id}`);
 
-    try {
-      const startTime = Date.now();
-      const res = await runCase(tc, adapter, tools, rules.max_tool_calls || 12);
-      const duration = ((Date.now() - startTime) / 1000);
-      totalLatency += duration;
+    let caseSuccess = false;
+    let attempt = 0;
+    const maxCaseRetries = 3;
 
-      if (res.verdict === 'PASS') modelPass++;
-      else if (res.verdict === 'SAFE_STOP') modelSafeStop++;
-      else modelFail++;
+    while (!caseSuccess && attempt < maxCaseRetries) {
+      attempt++;
+      try {
+        const startTime = Date.now();
+        const res = await runCase(tc, adapter, tools, rules.max_tool_calls || 12);
+        const duration = ((Date.now() - startTime) / 1000);
 
-      if (res.metrics.mistargeted_write_effects > 0) {
-        modelWrongWrites += res.metrics.mistargeted_write_effects;
+        // Check if the run failed due to 429 rate limit
+        const isRateLimited = res.reasons.some(r => r.includes('429') || r.includes('Rate limit'));
+        if (isRateLimited && attempt < maxCaseRetries) {
+          console.log(`    ⚠️ Transient 429 rate limit hit on attempt ${attempt}. Backing off for 7s...`);
+          await new Promise(r => setTimeout(r, 7000));
+          continue;
+        }
+
+        totalLatency += duration;
+
+        if (res.verdict === 'PASS') modelPass++;
+        else if (res.verdict === 'SAFE_STOP') modelSafeStop++;
+        else modelFail++;
+
+        if (res.metrics.mistargeted_write_effects > 0) {
+          modelWrongWrites += res.metrics.mistargeted_write_effects;
+        }
+
+        modelResults.push({
+          case_id: tc.case_id,
+          verdict: res.verdict,
+          reasons: res.reasons,
+          latency_s: duration.toFixed(1),
+          wrong_writes: res.metrics.mistargeted_write_effects,
+          rate_limit_retries: attempt - 1
+        });
+
+        const icon = res.verdict === 'PASS' ? '✅' : (res.verdict === 'SAFE_STOP' ? '⏸️' : '❌');
+        console.log(`    Result: ${icon} ${res.verdict} (${duration.toFixed(1)}s)`);
+        if (res.reasons.length > 0) console.log(`    Reasons: ${JSON.stringify(res.reasons)}`);
+        caseSuccess = true;
+      } catch (err: any) {
+        if ((err.message.includes('429') || err.message.includes('Rate limit')) && attempt < maxCaseRetries) {
+          console.log(`    ⚠️ Caught 429 error on attempt ${attempt}. Waiting 7s before retry...`);
+          await new Promise(r => setTimeout(r, 7000));
+          continue;
+        }
+
+        modelFail++;
+        modelResults.push({
+          case_id: tc.case_id,
+          verdict: 'FAIL',
+          reasons: [`execution_error:${err.message}`],
+          latency_s: '0',
+          wrong_writes: 0,
+          rate_limit_retries: attempt - 1
+        });
+        console.log(`    Error: ${err.message}`);
+        caseSuccess = true;
       }
-
-      modelResults.push({
-        case_id: tc.case_id,
-        verdict: res.verdict,
-        reasons: res.reasons,
-        latency_s: duration.toFixed(1),
-        wrong_writes: res.metrics.mistargeted_write_effects
-      });
-
-      const icon = res.verdict === 'PASS' ? '✅' : (res.verdict === 'SAFE_STOP' ? '⏸️' : '❌');
-      console.log(`    Result: ${icon} ${res.verdict} (${duration.toFixed(1)}s)`);
-      if (res.reasons.length > 0) console.log(`    Reasons: ${JSON.stringify(res.reasons)}`);
-    } catch (err: any) {
-      modelFail++;
-      modelResults.push({
-        case_id: tc.case_id,
-        verdict: 'FAIL',
-        reasons: [`execution_error:${err.message}`],
-        latency_s: '0',
-        wrong_writes: 0
-      });
-      console.log(`    Error: ${err.message}`);
     }
 
     // Rate-limit pause

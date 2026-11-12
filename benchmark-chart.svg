@@ -143,16 +143,16 @@
     <text x="776" y="23" font-family="'JetBrains Mono', monospace" font-size="10" font-weight="700" fill="#fda4af" text-anchor="middle">2 err</text>
   </g>
 
-  <!-- Bar 6: Gemini 3.8 Flash (44%) -->
+  <!-- Bar 6: Gemini 3.8 Flash (25%) -->
   <g transform="translate(36, 305)">
     <text x="188" y="19" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="12" font-weight="600" fill="#fcd34d" text-anchor="end">Gemini 3.8 Flash</text>
     <text x="188" y="32" font-family="'JetBrains Mono', monospace" font-size="10" fill="#71717a" text-anchor="end">Frontier LLM (Rank 5)</text>
     
     <rect x="204" y="8" width="500" height="24" rx="5" fill="#18181b" />
-    <rect x="204" y="8" width="220" height="24" rx="5" fill="url(#barGemini)" />
-    <text x="432" y="25" font-family="'JetBrains Mono', monospace" font-size="12" font-weight="700" fill="#fcd34d">44%</text>
-    <rect x="752" y="10" width="48" height="18" rx="4" fill="#064e3b" />
-    <text x="776" y="23" font-family="'JetBrains Mono', monospace" font-size="10" font-weight="700" fill="#34d399" text-anchor="middle">0 err</text>
+    <rect x="204" y="8" width="125" height="24" rx="5" fill="url(#barGemini)" />
+    <text x="337" y="25" font-family="'JetBrains Mono', monospace" font-size="12" font-weight="700" fill="#fcd34d">25%</text>
+    <rect x="752" y="10" width="48" height="18" rx="4" fill="#4c0519" />
+    <text x="776" y="23" font-family="'JetBrains Mono', monospace" font-size="10" font-weight="700" fill="#fda4af" text-anchor="middle">2 err</text>
   </g>
 
   <!-- Bar 7: first_account Baseline (34%) -->

@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo, useTransition } from 'react';
+import { useState, useEffect, useMemo, useRef, useTransition } from 'react';
 import { SimulationHarness, type AgentChoice, type SimulationResult, isLiveLLM } from './engine.ts';
 import { Header } from './components/Header.tsx';
 import { ScenarioSidebar } from './components/ScenarioSidebar.tsx';
@@ -37,20 +37,29 @@ export function App() {
     return currentCases.find(c => c.variant === selectedVariant) || currentCases[0];
   }, [currentCases, selectedVariant]);
 
-  // Execute simulation whenever current case or agent changes
+  const runIdRef = useRef<number>(0);
+
+  // Execute simulation whenever current case or agent changes with stale-result protection
   const runSimulation = async (targetCase = currentCase, agent = selectedAgent) => {
+    const runId = ++runIdRef.current;
     setIsRunning(true);
     try {
       const res = await harness.runSingle(targetCase, agent);
-      setResult(res);
+      if (runIdRef.current === runId) {
+        setResult(res);
+      }
     } catch (err: any) {
-      if (err.message === 'NO_API_KEY_CONFIGURED') {
-        setIsApiKeyModalOpen(true);
-      } else {
-        console.error('Simulation error:', err);
+      if (runIdRef.current === runId) {
+        if (err.message === 'NO_API_KEY_CONFIGURED') {
+          setIsApiKeyModalOpen(true);
+        } else {
+          console.error('Simulation error:', err);
+        }
       }
     } finally {
-      setIsRunning(false);
+      if (runIdRef.current === runId) {
+        setIsRunning(false);
+      }
     }
   };
 
@@ -68,14 +77,9 @@ export function App() {
     });
   };
 
-  const handleQuickCompare = async () => {
-    // Toggle between base and reverse_accounts
-    const nextVariant = selectedVariant === 'base' ? 'reverse_accounts' : 'base';
-    setSelectedVariant(nextVariant);
-    const target = currentCases.find(c => c.variant === nextVariant);
-    if (target) {
-      await runSimulation(target, selectedAgent);
-    }
+  const handleQuickCompare = () => {
+    // Toggle variant; useEffect automatically triggers exactly one execution without race conditions
+    setSelectedVariant(prev => prev === 'base' ? 'reverse_accounts' : 'base');
   };
 
   const handleKeySaved = (key: string) => {

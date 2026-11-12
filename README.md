@@ -38,11 +38,11 @@ Empirical evaluation of frontier LLMs against the Agent Account Lab standardized
 | 🥈 | **Kimi K3** (`free/kimi-k3`) | Frontier LLM | **63%** | 5 / 8 | 0 | 3 | 2 | 15.8s |
 | 🥉 | **DeepSeek V4.1 Flash** (`free/deepseek-v4.1-flash`) | Frontier LLM | **50%** | 4 / 8 | 0 | 4 | 2 | 11.1s |
 | 4 | **Qwen 3.8 MAX** (`free/qwen-3.8-max`) | Frontier LLM | **50%** | 4 / 8 | 0 | 4 | 2 | 11.7s |
-| 5 | **Gemini 3.8 Flash** (`free/gemini-3.8-flash`)* | Frontier LLM | **44%** | 7 / 16 | 0 | 9 | 0 | 7.2s |
+| 5 | **Gemini 3.8 Flash** (`free/gemini-3.8-flash`)* | Frontier LLM | **25%** | 2 / 8 | 0 | 6 | 2 | 5.2s |
 | — | **`first_account` Baseline** | Negative Control | **34%** | 34 / 100 | 0 | 66 | 47 | <10ms |
 | — | **`default_account` Baseline** | Negative Control | **31%** | 31 / 100 | 0 | 69 | 50 | <10ms |
 
-*\*Note: Complete benchmark report, failure taxonomy, and citations are documented in [`docs/RESEARCH_REPORT.md`](docs/RESEARCH_REPORT.md).*
+*\*Note: In the standardized 8-case benchmark suite, Gemini 3.8 Flash scored 25% (2/8) with 2 mistargeted writes. In the expanded 16-case exploratory suite, it scored 44% (7/16). Full benchmark telemetry and citations are documented in [`docs/RESEARCH_REPORT.md`](docs/RESEARCH_REPORT.md).*
 
 ---
 
@@ -107,15 +107,15 @@ A naive or position-biased agent calls the tool on the **personal** account:
 
 ## Quick Start
 
-Requires **Node.js 24+**.
+Requires **Node.js >= 20.0.0** (Officially verified on Node 20 LTS and Node 24).
 
 ```sh
 # Clone repository
 git clone https://github.com/mohamed-khairy-5i/agent-account-lab.git
 cd agent-account-lab
 
-# Install dev dependencies
-npm install
+# Install both core and Web UI dependencies in one step
+npm run install:all
 
 # Run static typecheck (TypeScript strict mode)
 npm run typecheck
@@ -123,15 +123,22 @@ npm run typecheck
 # Run scenario integrity validation
 npm run validate
 
-# Run all 52 core functional tests
+# Run all core tests and adapter edge-case tests
 npm test
+
+# Verify file integrity against published sha256 manifest
+npm run manifest:verify
 
 # Run the live multi-model benchmark across frontier LLMs
 npm run benchmark:models
 
-# Launch the interactive local web UI (React + Vite)
+# Launch the interactive local web UI (React 19 + Vite 6)
 npm run ui
 ```
+
+### Web UI & Proxy Architecture
+- **Local Dev Proxy**: Running `npm run ui` launches the Vite development server on `http://127.0.0.1:5173`. Requests to `/api/llm` are securely proxied to `https://api.apinex.bond/v1` to bypass browser CORS constraints.
+- **Production & Custom Endpoints**: When running a standalone production build (`npm run ui:build && npm run ui:preview`) or targeting a custom provider (e.g. OpenAI, OpenRouter, or Ollama), open the **API Key Settings** modal (🔑) in the UI Header and provide your custom Base URL.
 
 ---
 
