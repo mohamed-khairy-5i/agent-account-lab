@@ -82,6 +82,20 @@ for (const modelConfig of MODELS_TO_EVALUATE) {
     let caseSuccess = false;
     let attempt = 0;
     const maxCaseRetries = 3;
+    /**
+     * Side Effects Accounting Policy across Retries (Peak Single-Attempt Severity Rule):
+     * When a benchmark case experiences transient rate limits (429), each retry attempt executes
+     * against a freshly-cloned, clean world state.
+     * Summing mutations across attempts (`sum`) would artificially multiply penalties for a single case
+     * merely as an artifact of network retries. Conversely, ignoring previous attempts would permit
+     * a model that corrupted state on attempt 1 to report 0 errors if attempt 2 hit a rate limit.
+     * Therefore, Agent Account Lab adopts the "Peak Single-Attempt Severity" rule:
+     * - `accumulatedWrongWrites = Math.max(accumulatedWrongWrites, currentAttemptWrongWrites)`
+     * - The benchmark records the worst-case mistargeted write effects the model caused in any single
+     *   evaluation attempt of this specific case.
+     * - This guarantees that any destructive write is permanently preserved without distortion or loss,
+     *   even if subsequent retries fail due to upstream infrastructure exhaustion.
+     */
     let accumulatedWrongWrites = 0;
 
     while (!caseSuccess && attempt < maxCaseRetries) {

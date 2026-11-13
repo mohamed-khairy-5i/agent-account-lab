@@ -7,7 +7,7 @@
 <p align="center">
   <a href=".github/workflows/ci.yml"><img src="https://img.shields.io/badge/CI-ناجح-10b981?style=flat-square&logo=github-actions" alt="CI Status" /></a>
   <a href="tsconfig.json"><img src="https://img.shields.io/badge/TypeScript-Strict_5.9-3178c6?style=flat-square&logo=typescript" alt="TypeScript Strict" /></a>
-  <a href="tests"><img src="https://img.shields.io/badge/الاختبارات-63%2F63_ناجحة-10b981?style=flat-square" alt="Tests 63/63 Passing" /></a>
+  <a href="tests"><img src="https://img.shields.io/badge/الاختبارات-69%2F69_ناجحة-10b981?style=flat-square" alt="Tests 69/69 Passing" /></a>
   <a href="docs/RESEARCH_REPORT.md"><img src="https://img.shields.io/badge/تقييم_النماذج-8_وكلاء-818cf8?style=flat-square" alt="Frontier Benchmark" /></a>
   <a href="package.json"><img src="https://img.shields.io/badge/Node.js-%3E%3D20.0.0-339933?style=flat-square&logo=node.js" alt="Node Version" /></a>
   <a href="SECURITY.md"><img src="https://img.shields.io/badge/سياسة_الأمان-معتمدة-blue.svg?style=flat-square" alt="Security Policy" /></a>
@@ -18,7 +18,7 @@
 
 مختبر مفتوح المصدر ومحلي بالكامل (Local-First) لاختبار نوع دقيق وخفي من أخطاء وكلاء الذكاء الاصطناعي (AI Agents): **استدعاء الأداة ينجح تقنيًا، لكنه ينفذ التعديل في الحساب الخطأ**.
 
-**الحالة: حزمة متكاملة جاهزة للإنتاج، واجهة ويب تفاعلية كاملة، ونتائج اختبار تجريبية لنماذج الذكاء الاصطناعي.**  
+**الحالة: مختبر تقييم تجريبي وبحثي قابل للتشغيل محلياً بالكامل (Local-First)، مع واجهة تفاعلية، موصل نماذج وظيفي، ونتائج تقييم تاريخية موثقة.**  
 📄 [قراءة ورقة البحث الأكاديمية الرسمية](docs/RESEARCH_REPORT.md) | 🌐 [واجهة الويب التفاعلية](#التشغيل-السريع-محليا) | 🇬🇧 [English Documentation](README.md)
 
 ---
@@ -33,7 +33,7 @@
 
 | الترتيب | النموذج / الوكيل المختبر | الفئة | النتيجة | نجاح مقيّم (Pass) | توقف آمن | فشل (Fail) | تعذر الخدمة (429) | تعديلات خاطئة (Wrong Writes) | متوسط الاستجابة |
 |:---:|---|---|:---:|:---:|:---:|:---:|:---:|:---:|:---:|
-| — | **`oracle-reference`** | مرجع برمجي مثالي | **100%** | 8 / 8 | 0 | 0 | 0 | 0 | <10ms |
+| — | **`oracle-reference`** | مرجع برمجي مثالي | **100%** | 7 / 8 | 1 | 0 | 0 | 0 | <10ms |
 | 🥇 | **GLM-5.3 Flash** (`free/glm-5.3-flash`) | نموذج ذكاء اصطناعي | **88%** | 7 / 8 | 0 | 1 | 0 | **0** | 13.1s |
 | 🥈 | **DeepSeek V4.1 Flash** (`free/deepseek-v4.1-flash`)* | نموذج ذكاء اصطناعي | **67%** | 4 / 6 | 0 | 2 | 2 | 2 | 8.2s |
 | 🥉 | **Qwen 3.8 MAX** (`free/qwen-3.8-max`)* | نموذج ذكاء اصطناعي | **67%** | 4 / 6 | 0 | 2 | 2 | 2 | 9.0s |
@@ -102,7 +102,7 @@
 - **أتمتة الفحص والتكامل المستمر (CI)** عبر GitHub Actions في `.github/workflows/ci.yml`.
 - **موصلات نماذج ذكية حقيقية** متوافقة مع واجهات OpenAI API وتدعم إعادة المحاولة التلقائية ومقاومة قيود الاستدعاء (Rate Limits).
 - **واجهة ويب تفاعلية محلية (React 19 + Vite)** بتصميم داكن احترافي، ودعم كامل للغة العربية (RTL)، ومولد مقارنة التعديلات.
-- **٦٣ اختبارًا وظيفيًا مؤتمتًا تمر جميعها بنجاح (٦٣ نجاح، صفر فشل)** بدون أي حزم تشغيل خارجية.
+- **٦٩ اختبارًا وظيفيًا مؤتمتًا تمر جميعها بنجاح (٦٩ نجاح، صفر فشل)** بدون أي حزم تشغيل خارجية.
 
 ---
 

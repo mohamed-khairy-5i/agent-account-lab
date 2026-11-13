@@ -31,13 +31,13 @@ export function getTrackedFiles(dir = rootDir): string[] {
       .filter(f => f.length > 0 && f !== 'MANIFEST.sha256');
     return gitFiles;
   } catch {
-    // Fallback if git is unavailable: scan project files excluding ephemeral folders
-    const IGNORED = ['.git', 'node_modules', 'dist', '.env', '.user_uploaded'];
+    // Fallback if git is unavailable: scan project files excluding known build/vcs folders
+    const IGNORED_NAMES = new Set(['.git', 'node_modules', 'dist', '.env', '.user_uploaded', '.DS_Store', 'Thumbs.db']);
     const files: string[] = [];
 
     function scan(current: string) {
       for (const item of readdirSync(current)) {
-        if (IGNORED.some(ig => item === ig || item.startsWith('.'))) continue;
+        if (IGNORED_NAMES.has(item)) continue;
         const full = resolve(current, item);
         const st = statSync(full);
         if (st.isDirectory()) {
@@ -61,9 +61,12 @@ export function verifyManifest(targetManifestPath = manifestPath, baseDir = root
       success: false,
       error: `MANIFEST.sha256 not found at: ${targetManifestPath}`,
       passed: 0,
-      mismatches: [],
-      missingFromDisk: [],
-      untrackedInManifest: []
+      mismatches: [] as { path: string; expected: string; actual: string }[],
+      missingFromDisk: [] as string[],
+      untrackedInManifest: [] as string[],
+      untrackedExtraInManifest: [] as string[],
+      duplicatePaths: [] as string[],
+      invalidFormatLines: [] as string[]
     };
   }
 
@@ -72,12 +75,23 @@ export function verifyManifest(targetManifestPath = manifestPath, baseDir = root
     .map(l => l.trim())
     .filter(l => l.length > 0);
 
+  const SHA256_LINE_REGEX = /^[a-f0-9]{64}\s\s?.+$/i;
+  const invalidFormatLines: string[] = [];
+  const duplicatePaths: string[] = [];
   const manifestMap = new Map<string, string>();
+
   for (const line of lines) {
+    if (!SHA256_LINE_REGEX.test(line)) {
+      invalidFormatLines.push(line);
+      continue;
+    }
     const parts = line.split(/\s+/);
     if (parts.length < 2) continue;
     const hash = parts[0];
     const path = parts.slice(1).join(' ').replace(/\\/g, '/');
+    if (manifestMap.has(path)) {
+      duplicatePaths.push(path);
+    }
     manifestMap.set(path, hash);
   }
 
@@ -102,22 +116,46 @@ export function verifyManifest(targetManifestPath = manifestPath, baseDir = root
 
   // Direction 2: Completeness check - Every tracked repository file must be listed in MANIFEST
   const trackedFiles = getTrackedFiles(baseDir);
+  const trackedSet = new Set(trackedFiles);
   const untrackedInManifest = trackedFiles.filter(f => !manifestMap.has(f));
+  const untrackedExtraInManifest = Array.from(manifestMap.keys()).filter(f => !trackedSet.has(f));
 
-  const success = mismatches.length === 0 && missingFromDisk.length === 0 && untrackedInManifest.length === 0;
+  const success = mismatches.length === 0 &&
+    missingFromDisk.length === 0 &&
+    untrackedInManifest.length === 0 &&
+    untrackedExtraInManifest.length === 0 &&
+    duplicatePaths.length === 0 &&
+    invalidFormatLines.length === 0;
 
   return {
     success,
     passed,
     mismatches,
     missingFromDisk,
-    untrackedInManifest
+    untrackedInManifest,
+    untrackedExtraInManifest,
+    duplicatePaths,
+    invalidFormatLines
   };
 }
 
 // Direct CLI execution
 if (process.argv[1] && fileURLToPath(import.meta.url) === resolve(process.argv[1])) {
   const result = verifyManifest();
+
+  if (result.invalidFormatLines.length > 0) {
+    console.error(`\n❌ INVALID MANIFEST FORMAT LINES (${result.invalidFormatLines.length}):`);
+    for (const l of result.invalidFormatLines) {
+      console.error(`  - "${l}"`);
+    }
+  }
+
+  if (result.duplicatePaths.length > 0) {
+    console.error(`\n❌ DUPLICATE PATHS IN MANIFEST (${result.duplicatePaths.length}):`);
+    for (const p of result.duplicatePaths) {
+      console.error(`  - ${p}`);
+    }
+  }
 
   if (result.mismatches.length > 0) {
     console.error(`\n❌ HASH MISMATCHES (${result.mismatches.length}):`);
@@ -142,8 +180,15 @@ if (process.argv[1] && fileURLToPath(import.meta.url) === resolve(process.argv[1
     }
   }
 
+  if (result.untrackedExtraInManifest.length > 0) {
+    console.error(`\n❌ EXTRA ORPHANED ENTRIES IN MANIFEST (${result.untrackedExtraInManifest.length}):`);
+    for (const p of result.untrackedExtraInManifest) {
+      console.error(`  - ${p}`);
+    }
+  }
+
   console.log(`\n=======================================================`);
-  console.log(`🔐 MANIFEST.sha256 Verification: ${result.passed} OK, ${result.mismatches.length} mismatches, ${result.missingFromDisk.length} missing, ${result.untrackedInManifest.length} untracked.`);
+  console.log(`🔐 MANIFEST.sha256 Verification: ${result.passed} OK, ${result.mismatches.length} mismatches, ${result.missingFromDisk.length} missing, ${result.untrackedInManifest.length} untracked, ${result.untrackedExtraInManifest.length} extra.`);
   console.log(`=======================================================`);
 
   if (!result.success) {

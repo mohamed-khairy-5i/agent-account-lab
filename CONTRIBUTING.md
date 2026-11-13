@@ -41,14 +41,14 @@ npm run validate
 # 2. Run static TypeScript typecheck
 npm run typecheck
 
-# 3. Execute all 63 automated tests (core suite + adapter edge cases)
+# 3. Execute all 69 automated tests (core suite + adapter edge cases + smoke tests)
 npm test
 
 # 4. Verify simulation demo and report generation
 npm run demo
 ```
 
-All 63 tests and type checks must pass with zero errors.
+All 69 tests and type checks must pass with zero errors.
 
 ---
 

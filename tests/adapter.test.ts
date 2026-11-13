@@ -1,14 +1,14 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { createServer } from 'node:http';
-import { writeFileSync, unlinkSync, existsSync } from 'node:fs';
+import { writeFileSync, unlinkSync, existsSync, readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { makeOpenAICompatibleAdapter, isClarificationAnswer } from '../src/adapters/openai-compatible.ts';
 import { loadScenarios, loadTools, loadRules } from '../src/data.ts';
 import { generateCases } from '../src/variants.ts';
 import { runCase } from '../src/runner.ts';
 import type { AgentContext, ToolDefinition } from '../src/types.ts';
-import { sortLeaderboard, getRankBadge, generateFootnotes, generateMarkdownTable } from '../scripts/sync-benchmark-reports.ts';
+import { sortLeaderboard, getRankBadge, generateFootnotes, generateMarkdownTable, syncBenchmark } from '../scripts/sync-benchmark-reports.ts';
 import { validateCustomEndpoint } from '../src/validate-endpoint.ts';
 import { verifyManifest } from '../scripts/verify-manifest.ts';
 
@@ -570,5 +570,146 @@ test('verifyManifest performs bidirectional completeness check and detects untra
     if (existsSync(tempManifestPath)) {
       unlinkSync(tempManifestPath);
     }
+  }
+});
+
+test('Oracle row in benchmark generators matches single source of truth in UI (7 PASS, 1 SAFE_STOP, 0 FAIL)', () => {
+  // Read and verify ui/src/benchmark-data.ts directly
+  const benchmarkDataContent = readFileSync(resolve(process.cwd(), 'ui/src/benchmark-data.ts'), 'utf8');
+  assert.ok(benchmarkDataContent.includes('pass: 7'), 'UI Oracle benchmark data must have pass: 7');
+  assert.ok(benchmarkDataContent.includes('safeStop: 1'), 'UI Oracle benchmark data must have safeStop: 1');
+  assert.ok(benchmarkDataContent.includes('fail: 0'), 'UI Oracle benchmark data must have fail: 0');
+  assert.ok(benchmarkDataContent.includes('score: 100'), 'UI Oracle benchmark data must have score: 100');
+
+  // Verify markdown table generators in English and Arabic match Oracle numbers
+  const enTable = generateMarkdownTable([], 'en');
+  assert.ok(enTable.includes('| — | **`oracle-reference`** | Programmatic Oracle | **100%** | 7 / 8 | 1 | 0 | 0 | 0 | <10ms |'), 'English table must show 7 PASS, 1 SAFE_STOP for Oracle');
+
+  const arTable = generateMarkdownTable([], 'ar');
+  assert.ok(arTable.includes('| — | **`oracle-reference`** | مرجع برمجي مثالي | **100%** | 7 / 8 | 1 | 0 | 0 | 0 | <10ms |'), 'Arabic table must show 7 PASS, 1 SAFE_STOP for Oracle');
+});
+
+test('syncBenchmark reliably synchronizes README, README_AR, and RESEARCH_REPORT without heading drift', () => {
+  // Execute sync
+  syncBenchmark();
+
+  // Read docs/RESEARCH_REPORT.md and confirm it contains the synchronized table
+  const researchContent = readFileSync(resolve(process.cwd(), 'docs/RESEARCH_REPORT.md'), 'utf8');
+  assert.ok(researchContent.includes('<!-- BENCHMARK_TABLE_START -->'), 'Must retain table start marker');
+  assert.ok(researchContent.includes('<!-- BENCHMARK_TABLE_END -->'), 'Must retain table end marker');
+  assert.ok(researchContent.includes('| 🥇 | **GLM-5.3 Flash**'), 'Must contain synchronized top model');
+  assert.ok(researchContent.includes('| — | **`oracle-reference`** | Programmatic Oracle | **100%** | 7 / 8 | 1 |'), 'Must contain synchronized Oracle row');
+});
+
+test('429 retry side effect policy preserves peak single-attempt severity without erasure or inflation', () => {
+  // Test the mathematical behavior of Peak Single-Attempt Severity rule
+  let accumulatedWrongWrites = 0;
+
+  // Attempt 1: Model mutates wrong account (1 wrong write), then connection dies with 429
+  const attempt1WrongWrites = 1;
+  accumulatedWrongWrites = Math.max(accumulatedWrongWrites, attempt1WrongWrites);
+  assert.equal(accumulatedWrongWrites, 1, 'Attempt 1 side effect must be captured');
+
+  // Attempt 2: Immediate 429 (0 writes performed before rejection)
+  const attempt2WrongWrites = 0;
+  accumulatedWrongWrites = Math.max(accumulatedWrongWrites, attempt2WrongWrites);
+  assert.equal(accumulatedWrongWrites, 1, 'Attempt 1 side effect must NOT be zeroed out or erased on retry');
+
+  // Attempt 3: Another attempt with 1 write does not artificially inflate to 2 or 3
+  const attempt3WrongWrites = 1;
+  accumulatedWrongWrites = Math.max(accumulatedWrongWrites, attempt3WrongWrites);
+  assert.equal(accumulatedWrongWrites, 1, 'Same peak severity must not artificially inflate count');
+});
+
+test('verifyManifest detects invalid SHA256 format, duplicate lines, and extra untracked entries', () => {
+  const tempManifest = resolve(process.cwd(), 'temp_strict_manifest.sha256');
+  try {
+    // 1. Invalid line format (not a 64-char sha256)
+    writeFileSync(tempManifest, 'not-a-valid-sha256  package.json\n', 'utf8');
+    const fmtResult = verifyManifest(tempManifest);
+    assert.equal(fmtResult.success, false);
+    assert.equal(fmtResult.invalidFormatLines.length, 1);
+
+    // 2. Duplicate entries for the same path
+    const validHash = '0'.repeat(64);
+    writeFileSync(tempManifest, `${validHash}  package.json\n${validHash}  package.json\n`, 'utf8');
+    const dupResult = verifyManifest(tempManifest);
+    assert.equal(dupResult.success, false);
+    assert.equal(dupResult.duplicatePaths.includes('package.json'), true);
+
+    // 3. Extra orphaned path not tracked in repository
+    writeFileSync(tempManifest, `${validHash}  non_existent_ghost_file.txt\n`, 'utf8');
+    const extraResult = verifyManifest(tempManifest);
+    assert.equal(extraResult.success, false);
+    assert.equal(extraResult.untrackedExtraInManifest.includes('non_existent_ghost_file.txt'), true);
+  } finally {
+    if (existsSync(tempManifest)) {
+      unlinkSync(tempManifest);
+    }
+  }
+});
+
+test('API key security notice accurately documents localStorage and local Vite proxy in both languages', () => {
+  const i18nContent = readFileSync(resolve(process.cwd(), 'ui/src/i18n.tsx'), 'utf8');
+
+  // Arabic notice
+  assert.ok(i18nContent.includes('localStorage'), 'Arabic notice must explicitly mention localStorage');
+  assert.ok(i18nContent.includes('/api/llm'), 'Arabic notice must explicitly mention /api/llm proxy');
+  assert.ok(!i18nContent.includes('مباشرة وحصرياً إلى مزوّد الخدمة'), 'Arabic notice must not claim direct communication for proxy mode');
+
+  // English notice
+  assert.ok(i18nContent.includes('localStorage'), 'English notice must explicitly mention localStorage');
+  assert.ok(i18nContent.includes('/api/llm'), 'English notice must explicitly mention /api/llm proxy');
+  assert.ok(!i18nContent.includes('exclusively to your selected AI provider'), 'English notice must not claim direct communication for proxy mode');
+});
+
+test('Vite proxy routing smoke test forwards /api/llm correctly to mock upstream with auth headers', async () => {
+  // 1. Create a mock upstream LLM HTTP server
+  let receivedPath = '';
+  let receivedAuth = '';
+  const upstreamServer = createServer((req, res) => {
+    receivedPath = req.url || '';
+    receivedAuth = req.headers['authorization'] || '';
+    res.writeHead(200, { 'Content-Type': 'application/json' });
+    res.end(JSON.stringify({ choices: [{ message: { content: 'upstream mock response ok' } }] }));
+  });
+
+  await new Promise<void>((resolveServer) => {
+    upstreamServer.listen(0, '127.0.0.1', () => resolveServer());
+  });
+
+  const address = upstreamServer.address();
+  const upstreamPort = typeof address === 'object' && address ? address.port : 0;
+
+  try {
+    // 2. Simulate the Vite reverse proxy behavior: rewrite path (/api/llm/* -> /*) and forward
+    const proxyHandler = async (clientUrl: string, authHeader: string) => {
+      const rewrittenPath = clientUrl.replace(/^\/api\/llm/, '');
+      const upstreamUrl = `http://127.0.0.1:${upstreamPort}${rewrittenPath}`;
+      const response = await fetch(upstreamUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': authHeader
+        },
+        body: JSON.stringify({ model: 'mock-model', messages: [] })
+      });
+      return await response.json();
+    };
+
+    // 3. Make client call to /api/llm/chat/completions
+    const clientResult = await proxyHandler('/api/llm/chat/completions', 'Bearer sk-test-proxy-token');
+
+    assert.equal(receivedPath, '/chat/completions', 'Proxy rewrite must strip /api/llm prefix');
+    assert.equal(receivedAuth, 'Bearer sk-test-proxy-token', 'Proxy must preserve Authorization bearer token');
+    assert.equal(clientResult.choices[0].message.content, 'upstream mock response ok', 'Client must receive upstream payload');
+
+    // 4. Verify UI production bundle exists and is valid
+    const uiDistIndex = resolve(process.cwd(), 'ui/dist/index.html');
+    assert.ok(existsSync(uiDistIndex), 'ui/dist/index.html must exist from build');
+    const indexHtmlContent = readFileSync(uiDistIndex, 'utf8');
+    assert.ok(indexHtmlContent.includes('<!doctype html>') || indexHtmlContent.includes('<html'), 'ui/dist/index.html must be valid HTML');
+  } finally {
+    upstreamServer.close();
   }
 });

@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import type { SimulationResult } from '../engine.ts';
 import { ArrowRightIcon, RefreshIcon, DownloadIcon, LayersIcon, BarChartIcon, TrophyIcon, ShieldIcon } from './Icons.tsx';
 import { useLanguage } from '../i18n.tsx';
-import { getLeaderboardData, BENCHMARK_TIMESTAMP, type LeaderboardEntry } from '../benchmark-data.ts';
+import { getLeaderboardData, getBenchmarkSummary, BENCHMARK_TIMESTAMP, type LeaderboardEntry } from '../benchmark-data.ts';
 
 interface BatchOverviewProps {
   onRunBatch: (onProgress: (done: number, total: number) => void) => Promise<SimulationResult[]>;
@@ -165,8 +165,18 @@ export const BatchOverview: React.FC<BatchOverviewProps> = ({ onRunBatch, onBack
         </div>
       </div>
 
-      {activeTab === 'leaderboard' && (
+      {activeTab === 'leaderboard' && (() => {
+        const summary = getBenchmarkSummary();
+        return (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+          {/* Historical Snapshot Badge */}
+          <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+            <span className="pill pill-neutral" style={{ fontSize: '0.74rem' }}>
+              {lang === 'ar' ? 'سجل تقييم تاريخي موثق: ' : 'Documented Historical Snapshot: '}
+              {new Date(summary.timestamp).toISOString().replace('.000Z', 'Z')}
+            </span>
+          </div>
+
           {/* 4 Metric Highlight Cards */}
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(230px, 1fr))', gap: '12px' }}>
             <div style={{ background: '#121215', border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-sm)', padding: '14px 16px' }}>
@@ -174,9 +184,9 @@ export const BatchOverview: React.FC<BatchOverviewProps> = ({ onRunBatch, onBack
                 <span style={{ fontSize: '0.76rem', color: 'var(--text-muted)' }}>{t.metric_best_performer}</span>
                 <span style={{ fontSize: '1.1rem' }}>🥇</span>
               </div>
-              <div style={{ fontSize: '1.25rem', fontWeight: 800, color: '#34d399' }}>GLM-5.3 Flash</div>
+              <div style={{ fontSize: '1.25rem', fontWeight: 800, color: '#34d399' }}>{summary.topModel.label}</div>
               <div style={{ fontSize: '0.74rem', color: 'var(--text-dim)', marginTop: '2px' }}>
-                88% {lang === 'ar' ? 'نسبة الدقة (7 من 8)' : 'Compliance Score (7/8)'}
+                {summary.topModel.scorePct}% {lang === 'ar' ? `نسبة الدقة (${summary.topModel.pass} من ${summary.topModel.evaluatedCases})` : `Compliance Score (${summary.topModel.pass}/${summary.topModel.evaluatedCases})`}
               </div>
             </div>
 
@@ -185,9 +195,9 @@ export const BatchOverview: React.FC<BatchOverviewProps> = ({ onRunBatch, onBack
                 <span style={{ fontSize: '0.76rem', color: 'var(--text-muted)' }}>{t.metric_zero_mistargets}</span>
                 <ShieldIcon size={16} color="#10b981" />
               </div>
-              <div style={{ fontSize: '1.25rem', fontWeight: 800, color: '#10b981' }}>0 Writes</div>
+              <div style={{ fontSize: '1.25rem', fontWeight: 800, color: '#10b981' }}>{summary.zeroMistargetModel.mistargets} Writes</div>
               <div style={{ fontSize: '0.74rem', color: 'var(--text-dim)', marginTop: '2px' }}>
-                GLM-5.3 Flash ({lang === 'ar' ? 'الوحيد بصفر أثر خاطئ' : 'Only model with 0 mistargeted writes'})
+                {summary.zeroMistargetModel.label} ({lang === 'ar' ? 'الوحيد بصفر أثر خاطئ' : 'Only model with 0 mistargeted writes'})
               </div>
             </div>
 
@@ -196,9 +206,9 @@ export const BatchOverview: React.FC<BatchOverviewProps> = ({ onRunBatch, onBack
                 <span style={{ fontSize: '0.76rem', color: 'var(--text-muted)' }}>{t.metric_avg_latency}</span>
                 <span style={{ fontSize: '1.1rem' }}>⚡</span>
               </div>
-              <div style={{ fontSize: '1.25rem', fontWeight: 800, color: '#fbbf24' }}>5.2s / run</div>
+              <div style={{ fontSize: '1.25rem', fontWeight: 800, color: '#fbbf24' }}>{summary.fastestModel.avgLatency} / run</div>
               <div style={{ fontSize: '0.74rem', color: 'var(--text-dim)', marginTop: '2px' }}>
-                Gemini 3.8 Flash ({lang === 'ar' ? 'الأسرع زمناً' : 'Fastest inference'})
+                {summary.fastestModel.label} ({lang === 'ar' ? 'الأسرع زمناً' : 'Fastest inference'})
               </div>
             </div>
 
@@ -207,9 +217,9 @@ export const BatchOverview: React.FC<BatchOverviewProps> = ({ onRunBatch, onBack
                 <span style={{ fontSize: '0.76rem', color: 'var(--text-muted)' }}>{t.metric_total_models}</span>
                 <LayersIcon size={16} color="#818cf8" />
               </div>
-              <div style={{ fontSize: '1.25rem', fontWeight: 800, color: '#818cf8' }}>8 Agents</div>
+              <div style={{ fontSize: '1.25rem', fontWeight: 800, color: '#818cf8' }}>{summary.totalAgentsCount} Agents</div>
               <div style={{ fontSize: '0.74rem', color: 'var(--text-dim)', marginTop: '2px' }}>
-                5 Frontier LLMs + 3 {lang === 'ar' ? 'ضوابط مرجعية' : 'Baselines'}
+                {summary.totalLlmCount} Frontier LLMs + {summary.totalBaselineCount} {lang === 'ar' ? 'ضوابط مرجعية' : 'Baselines'}
               </div>
             </div>
           </div>
@@ -326,7 +336,8 @@ export const BatchOverview: React.FC<BatchOverviewProps> = ({ onRunBatch, onBack
             </div>
           </div>
         </div>
-      )}
+      );
+      })()}
 
       {activeTab === 'simulation' && (
         <div className="ui-card">

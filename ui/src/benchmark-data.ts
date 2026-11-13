@@ -100,3 +100,55 @@ export function getLeaderboardData(): LeaderboardEntry[] {
 
   return [oracle, ...models, ...baselines];
 }
+
+export interface BenchmarkSummary {
+  timestamp: string;
+  topModel: {
+    label: string;
+    scorePct: number;
+    pass: number;
+    evaluatedCases: number;
+  };
+  zeroMistargetModel: {
+    label: string;
+    mistargets: number;
+  };
+  fastestModel: {
+    label: string;
+    avgLatency: string;
+  };
+  totalAgentsCount: number;
+  totalLlmCount: number;
+  totalBaselineCount: number;
+}
+
+export function getBenchmarkSummary(): BenchmarkSummary {
+  const allEntries = getLeaderboardData();
+  const llmEntries = allEntries.filter(m => m.category === 'Frontier LLM');
+  const sortedByScore = [...llmEntries].sort((a, b) => b.score - a.score);
+  
+  const top = sortedByScore[0] || { name: 'GLM-5.3 Flash', score: 88, pass: 7, total: 8 };
+  const zeroMistarget = llmEntries.find(m => m.mistargets === 0) || { name: 'GLM-5.3 Flash', mistargets: 0 };
+  const fastest = [...llmEntries].sort((a, b) => parseFloat(a.latency) - parseFloat(b.latency))[0] || { name: 'Gemini 3.8 Flash', latency: '5.2s' };
+  
+  return {
+    timestamp: BENCHMARK_TIMESTAMP,
+    topModel: {
+      label: top.name,
+      scorePct: top.score,
+      pass: top.pass,
+      evaluatedCases: top.total
+    },
+    zeroMistargetModel: {
+      label: zeroMistarget.name,
+      mistargets: zeroMistarget.mistargets
+    },
+    fastestModel: {
+      label: fastest.name,
+      avgLatency: fastest.latency
+    },
+    totalAgentsCount: allEntries.length,
+    totalLlmCount: llmEntries.length,
+    totalBaselineCount: allEntries.length - llmEntries.length
+  };
+}

@@ -109,10 +109,10 @@ export function generateMarkdownTable(sortedModels: LeaderboardModel[], lang: 'e
   const header = isEn
     ? `| Rank | Model / Agent Under Test | Category | Score | Evaluated Pass | Safe Stop | Fail | Service Unavailable (429) | Mistargeted Writes | Avg Latency |
 |:---:|---|---|:---:|:---:|:---:|:---:|:---:|:---:|:---:|
-| — | **\`oracle-reference\`** | Programmatic Oracle | **100%** | 8 / 8 | 0 | 0 | 0 | 0 | <10ms |`
+| — | **\`oracle-reference\`** | Programmatic Oracle | **100%** | 7 / 8 | 1 | 0 | 0 | 0 | <10ms |`
     : `| الترتيب | النموذج / الوكيل المختبر | الفئة | النتيجة | نجاح مقيّم (Pass) | توقف آمن | فشل (Fail) | تعذر الخدمة (429) | تعديلات خاطئة (Wrong Writes) | متوسط الاستجابة |
 |:---:|---|---|:---:|:---:|:---:|:---:|:---:|:---:|:---:|
-| — | **\`oracle-reference\`** | مرجع برمجي مثالي | **100%** | 8 / 8 | 0 | 0 | 0 | 0 | <10ms |`;
+| — | **\`oracle-reference\`** | مرجع برمجي مثالي | **100%** | 7 / 8 | 1 | 0 | 0 | 0 | <10ms |`;
 
   const rows = sortedModels.map((m, idx) => {
     const rank = getRankBadge(idx);
@@ -277,10 +277,17 @@ export function syncBenchmark() {
   const researchPath = path.join(rootDir, 'docs', 'RESEARCH_REPORT.md');
   if (fs.existsSync(researchPath)) {
     let content = fs.readFileSync(researchPath, 'utf-8');
-    content = content.replace(
-      /\| Rank \| Model \/ Agent Under Test \|[\s\S]*?(?=\n---\n\n## 4\. Key Findings)/,
-      generateMarkdownTable(sorted, 'en')
-    );
+    if (content.includes('<!-- BENCHMARK_TABLE_START -->') && content.includes('<!-- BENCHMARK_TABLE_END -->')) {
+      content = content.replace(
+        /<!-- BENCHMARK_TABLE_START -->[\s\S]*?<!-- BENCHMARK_TABLE_END -->/,
+        `<!-- BENCHMARK_TABLE_START -->\n${generateMarkdownTable(sorted, 'en')}\n<!-- BENCHMARK_TABLE_END -->`
+      );
+    } else {
+      content = content.replace(
+        /\| Rank \| Model \/ Agent Under Test \|[\s\S]*?(?=\n\n### 4\.2|\n\n### 4\.1|\n---\n)/,
+        generateMarkdownTable(sorted, 'en')
+      );
+    }
     fs.writeFileSync(researchPath, content, 'utf-8');
     console.log('✅ docs/RESEARCH_REPORT.md table dynamically updated.');
   }

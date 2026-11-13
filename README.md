@@ -7,7 +7,7 @@
 <p align="center">
   <a href=".github/workflows/ci.yml"><img src="https://img.shields.io/badge/CI-Passing-10b981?style=flat-square&logo=github-actions" alt="CI Status" /></a>
   <a href="tsconfig.json"><img src="https://img.shields.io/badge/TypeScript-Strict_5.9-3178c6?style=flat-square&logo=typescript" alt="TypeScript Strict" /></a>
-  <a href="tests"><img src="https://img.shields.io/badge/Tests-63%2F63_Passing-10b981?style=flat-square" alt="Tests 63/63 Passing" /></a>
+  <a href="tests"><img src="https://img.shields.io/badge/Tests-69%2F69_Passing-10b981?style=flat-square" alt="Tests 69/69 Passing" /></a>
   <a href="docs/RESEARCH_REPORT.md"><img src="https://img.shields.io/badge/Frontier_Benchmark-8_Agents-818cf8?style=flat-square" alt="Frontier Benchmark" /></a>
   <a href="package.json"><img src="https://img.shields.io/badge/Node.js-%3E%3D20.0.0-339933?style=flat-square&logo=node.js" alt="Node Version" /></a>
   <a href="SECURITY.md"><img src="https://img.shields.io/badge/Security-Policy-blue.svg?style=flat-square" alt="Security Policy" /></a>
@@ -20,7 +20,7 @@ Open-source, local-first testing for a specific AI agent failure: **the tool cal
 
 Both accounts may be authorized. This lab checks whether the action matches the user's intended account, file, and operation.
 
-**Status: Production-grade Evaluation Suite, Interactive Web UI, and Frontier LLM Benchmark.**  
+**Status: Experimental Local-First Research & Benchmark Suite, Interactive Web UI, and Documented Empirical LLM Results.**  
 📄 [Read Full Academic Research Paper](docs/RESEARCH_REPORT.md) | 🌐 [Interactive Web UI](#interactive-local-web-ui) | 🇪🇬 [الشرح بالعربي](README_AR.md)
 
 ---
@@ -35,7 +35,7 @@ Empirical evaluation of frontier LLMs against the Agent Account Lab standardized
 
 | Rank | Model / Agent Under Test | Category | Score | Evaluated Pass | Safe Stop | Fail | Service Unavailable (429) | Mistargeted Writes | Avg Latency |
 |:---:|---|---|:---:|:---:|:---:|:---:|:---:|:---:|:---:|
-| — | **`oracle-reference`** | Programmatic Oracle | **100%** | 8 / 8 | 0 | 0 | 0 | 0 | <10ms |
+| — | **`oracle-reference`** | Programmatic Oracle | **100%** | 7 / 8 | 1 | 0 | 0 | 0 | <10ms |
 | 🥇 | **GLM-5.3 Flash** (`free/glm-5.3-flash`) | Frontier LLM | **88%** | 7 / 8 | 0 | 1 | 0 | **0** | 13.1s |
 | 🥈 | **DeepSeek V4.1 Flash** (`free/deepseek-v4.1-flash`)* | Frontier LLM | **67%** | 4 / 6 | 0 | 2 | 2 | 2 | 8.2s |
 | 🥉 | **Qwen 3.8 MAX** (`free/qwen-3.8-max`)* | Frontier LLM | **67%** | 4 / 6 | 0 | 2 | 2 | 2 | 9.0s |
@@ -103,9 +103,9 @@ A naive or position-biased agent calls the tool on the **personal** account:
 - **Deterministic rule engine & evaluator** (12 evaluation rules, isolated state per run).
 - **Independent static type checking** (`TypeScript 5.8+`, strict mode).
 - **Automated CI workflow** (`.github/workflows/ci.yml`).
-- **Production-ready real LLM adapters** supporting OpenAI-compatible endpoints with automated rate-limiting & backoff.
+- **Functional OpenAI-compatible model adapter** supporting rate-limit backoff, token budgeting, and trace capture.
 - **Local interactive React 19 + Vite Web UI** with full Arabic RTL support, dark theme, and trace visualization.
-- **61 passing automated core and adapter regression tests** with zero external runtime dependencies.
+- **69 passing automated core, adapter, and smoke tests** with zero external runtime dependencies.
 
 ---
 

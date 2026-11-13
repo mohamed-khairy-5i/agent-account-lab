@@ -120,7 +120,7 @@ export const REASONS_MAP: Record<string, { ar: string; en: string }> = {
   }
 };
 
-const UI_STRINGS: Record<Language, Record<string, string>> = {
+export const UI_STRINGS: Record<Language, Record<string, string>> = {
   ar: {
     brand_title: 'Agent Account Lab',
     brand_sub: 'حساب مين؟',
@@ -187,7 +187,7 @@ const UI_STRINGS: Record<Language, Record<string, string>> = {
     api_key_btn_configure: 'إعداد مفتاح API',
     api_key_modal_title: 'إعدادات مفتاح الذكاء الاصطناعي (Frontier LLM API)',
     api_key_modal_sub: 'تتيح لك تجربة وتقييم نماذج الذكاء الاصطناعي الحية (GLM, Kimi, DeepSeek, Qwen, Gemini) مباشرة من متصفحك.',
-    api_key_security_notice: 'يتم حفظ المفتاح محلياً في متصفحك (localStorage) ولا يُرفع لأي خوادم تتبّع أو تحليلية خاصة بنا. يُرسل المفتاح مشفراً مباشرة وحصرياً إلى مزوّد الخدمة (APInex / OpenAI API) لمصادقة استدعاءات النموذج.',
+    api_key_security_notice: 'يُحفظ المفتاح محلياً في متصفحك (localStorage) دون إرساله لأي خوادم تتبّع خارجية. في الوضع الافتراضي يمر الطلب عبر وكيل خادم Vite المحلي (/api/llm) ثم يُوجّه عبر HTTPS إلى مزوّد الخدمة؛ وفي حال إدخال Endpoint مخصص صالح، يتصل المتصفح به مباشرة عبر HTTPS.',
     api_key_input_label: 'مفتاح APInex / OpenAI-Compatible API Key:',
     api_key_input_placeholder: 'أدخل المفتاح هنا (مثال: sk-apx...)',
     api_key_endpoint_label: 'مسار نقطة النهاية (Endpoint Proxy / Base URL):',
@@ -270,7 +270,7 @@ const UI_STRINGS: Record<Language, Record<string, string>> = {
     api_key_btn_configure: 'Set API Key',
     api_key_modal_title: 'Frontier LLM API Key Settings',
     api_key_modal_sub: 'Enables live evaluation of Frontier AI models (GLM, Kimi, DeepSeek, Qwen, Gemini) directly from your browser.',
-    api_key_security_notice: 'Your API key is stored locally in your browser (localStorage) and never sent to any developer telemetry or tracking servers. It is transmitted securely and exclusively to your selected AI provider (APInex / OpenAI API) to authenticate model requests.',
+    api_key_security_notice: 'Your API key is stored locally in your browser (localStorage) and never uploaded to any remote tracking servers. In default mode, requests pass through the local Vite reverse proxy (/api/llm) and are forwarded over HTTPS to the provider; when using a validated custom endpoint, your browser connects directly over HTTPS.',
     api_key_input_label: 'APInex / OpenAI-Compatible API Key:',
     api_key_input_placeholder: 'Enter API key here (e.g. sk-apx...)',
     api_key_endpoint_label: 'Custom Endpoint / Base URL:',
