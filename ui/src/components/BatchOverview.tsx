@@ -184,9 +184,13 @@ export const BatchOverview: React.FC<BatchOverviewProps> = ({ onRunBatch, onBack
                 <span style={{ fontSize: '0.76rem', color: 'var(--text-muted)' }}>{t.metric_best_performer}</span>
                 <span style={{ fontSize: '1.1rem' }}>🥇</span>
               </div>
-              <div style={{ fontSize: '1.25rem', fontWeight: 800, color: '#34d399' }}>{summary.topModel.label}</div>
+              <div style={{ fontSize: '1.25rem', fontWeight: 800, color: '#34d399' }}>
+                {summary.topModel?.label || '—'}
+              </div>
               <div style={{ fontSize: '0.74rem', color: 'var(--text-dim)', marginTop: '2px' }}>
-                {summary.topModel.scorePct}% {lang === 'ar' ? `نسبة الدقة (${summary.topModel.pass} من ${summary.topModel.evaluatedCases})` : `Compliance Score (${summary.topModel.pass}/${summary.topModel.evaluatedCases})`}
+                {summary.topModel 
+                  ? `${summary.topModel.scorePct}% ${lang === 'ar' ? `نسبة الدقة (${summary.topModel.pass} من ${summary.topModel.evaluatedCases})` : `Compliance Score (${summary.topModel.pass}/${summary.topModel.evaluatedCases})`}`
+                  : (lang === 'ar' ? 'لا تتوفر بيانات' : 'No data available')}
               </div>
             </div>
 
@@ -195,9 +199,13 @@ export const BatchOverview: React.FC<BatchOverviewProps> = ({ onRunBatch, onBack
                 <span style={{ fontSize: '0.76rem', color: 'var(--text-muted)' }}>{t.metric_zero_mistargets}</span>
                 <ShieldIcon size={16} color="#10b981" />
               </div>
-              <div style={{ fontSize: '1.25rem', fontWeight: 800, color: '#10b981' }}>{summary.zeroMistargetModel.mistargets} Writes</div>
+              <div style={{ fontSize: '1.25rem', fontWeight: 800, color: '#10b981' }}>
+                {summary.zeroMistargetModel ? `${summary.zeroMistargetModel.mistargets} Writes` : '0 Writes'}
+              </div>
               <div style={{ fontSize: '0.74rem', color: 'var(--text-dim)', marginTop: '2px' }}>
-                {summary.zeroMistargetModel.label} ({lang === 'ar' ? 'الوحيد بصفر أثر خاطئ' : 'Only model with 0 mistargeted writes'})
+                {summary.zeroMistargetModel 
+                  ? `${summary.zeroMistargetModel.label} (${lang === 'ar' ? 'الوحيد بصفر أثر خاطئ' : 'Only model with 0 mistargeted writes'})`
+                  : (lang === 'ar' ? 'لا يوجد نموذج بصفر أثر خاطئ' : 'No model with 0 mistargets')}
               </div>
             </div>
 
@@ -206,9 +214,13 @@ export const BatchOverview: React.FC<BatchOverviewProps> = ({ onRunBatch, onBack
                 <span style={{ fontSize: '0.76rem', color: 'var(--text-muted)' }}>{t.metric_avg_latency}</span>
                 <span style={{ fontSize: '1.1rem' }}>⚡</span>
               </div>
-              <div style={{ fontSize: '1.25rem', fontWeight: 800, color: '#fbbf24' }}>{summary.fastestModel.avgLatency} / run</div>
+              <div style={{ fontSize: '1.25rem', fontWeight: 800, color: '#fbbf24' }}>
+                {summary.fastestModel ? `${summary.fastestModel.avgLatency} / run` : '—'}
+              </div>
               <div style={{ fontSize: '0.74rem', color: 'var(--text-dim)', marginTop: '2px' }}>
-                {summary.fastestModel.label} ({lang === 'ar' ? 'الأسرع زمناً' : 'Fastest inference'})
+                {summary.fastestModel 
+                  ? `${summary.fastestModel.label} (${lang === 'ar' ? 'الأسرع زمناً' : 'Fastest inference'})`
+                  : (lang === 'ar' ? 'لا تتوفر بيانات' : 'No data available')}
               </div>
             </div>
 

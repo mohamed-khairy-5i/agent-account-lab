@@ -108,45 +108,56 @@ export interface BenchmarkSummary {
     scorePct: number;
     pass: number;
     evaluatedCases: number;
-  };
+  } | null;
   zeroMistargetModel: {
     label: string;
     mistargets: number;
-  };
+  } | null;
   fastestModel: {
     label: string;
     avgLatency: string;
-  };
+  } | null;
   totalAgentsCount: number;
   totalLlmCount: number;
   totalBaselineCount: number;
 }
 
-export function getBenchmarkSummary(): BenchmarkSummary {
-  const allEntries = getLeaderboardData();
+export function getBenchmarkSummary(customEntries?: LeaderboardEntry[]): BenchmarkSummary {
+  const allEntries = customEntries || getLeaderboardData();
   const llmEntries = allEntries.filter(m => m.category === 'Frontier LLM');
-  const sortedByScore = [...llmEntries].sort((a, b) => b.score - a.score);
   
-  const top = sortedByScore[0] || { name: 'GLM-5.3 Flash', score: 88, pass: 7, total: 8 };
-  const zeroMistarget = llmEntries.find(m => m.mistargets === 0) || { name: 'GLM-5.3 Flash', mistargets: 0 };
-  const fastest = [...llmEntries].sort((a, b) => parseFloat(a.latency) - parseFloat(b.latency))[0] || { name: 'Gemini 3.8 Flash', latency: '5.2s' };
-  
+  // Authoritative multi-tier sort:
+  // 1. score descending
+  // 2. mistargets ascending
+  // 3. total (evaluated cases) descending
+  // 4. latency ascending
+  const sortedLlm = [...llmEntries].sort((a, b) => {
+    if (b.score !== a.score) return b.score - a.score;
+    if (a.mistargets !== b.mistargets) return a.mistargets - b.mistargets;
+    if (b.total !== a.total) return b.total - a.total;
+    return parseFloat(a.latency) - parseFloat(b.latency);
+  });
+
+  const top = sortedLlm[0] || null;
+  const zeroMistarget = llmEntries.find(m => m.mistargets === 0) || null;
+  const fastest = [...llmEntries].sort((a, b) => parseFloat(a.latency) - parseFloat(b.latency))[0] || null;
+
   return {
     timestamp: BENCHMARK_TIMESTAMP,
-    topModel: {
+    topModel: top ? {
       label: top.name,
       scorePct: top.score,
       pass: top.pass,
       evaluatedCases: top.total
-    },
-    zeroMistargetModel: {
+    } : null,
+    zeroMistargetModel: zeroMistarget ? {
       label: zeroMistarget.name,
       mistargets: zeroMistarget.mistargets
-    },
-    fastestModel: {
+    } : null,
+    fastestModel: fastest ? {
       label: fastest.name,
       avgLatency: fastest.latency
-    },
+    } : null,
     totalAgentsCount: allEntries.length,
     totalLlmCount: llmEntries.length,
     totalBaselineCount: allEntries.length - llmEntries.length

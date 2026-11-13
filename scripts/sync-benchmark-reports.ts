@@ -1,6 +1,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { classifyExecutionOutcome } from '../src/classification.ts';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -64,22 +65,28 @@ export function getRankBadge(index: number): string {
 export function generateFootnotes(sortedModels: LeaderboardModel[], lang: 'en' | 'ar'): string {
   const notes: string[] = [];
 
-  // 1. Models with rate-limited cases
+  // 1. Models with rate-limited or infrastructure-unavailable cases
   const rateLimitedModels = sortedModels.filter(m => (m.rate_limited || 0) > 0);
   for (const m of rateLimitedModels) {
     const rawScorePct = Math.round(((m.pass + m.safe_stop) / (m.total_cases || 8)) * 100);
     const rlCases = (m.results || [])
-      .filter((r: any) => r.verdict === 'RATE_LIMITED')
+      .filter((r: any) => r.verdict === 'RATE_LIMITED' || r.verdict === 'INFRASTRUCTURE_UNAVAILABLE')
       .map((r: any) => r.case_id)
       .join(', ');
 
+    const isNetwork = (m.results || []).some((r: any) => 
+      (r.reasons || []).some((reason: string) => reason.includes('fetch failed') || reason.includes('network'))
+    );
+    const reasonDescEn = isNetwork ? 'network transport interruption / provider rate limits' : 'upstream provider rate limits';
+    const reasonDescAr = isNetwork ? 'انقطاع الاتصال الشبكي / تجاوز معدل طلبات المزود' : 'تجاوز معدل الطلبات لدى المزود (429)';
+
     if (lang === 'en') {
       notes.push(
-        `- **Rate Limit Isolation (${m.label}):** Scored **${m.score_pct}%** across ${m.evaluated_cases} completed evaluation cases (${m.pass}/${m.evaluated_cases}), with ${m.rate_limited} case(s) recorded as service unavailable due to upstream provider rate limits (${rlCases || '429'}). Evaluated over all ${m.total_cases} cases without rate-limit isolation, raw compliance is ${rawScorePct}% (${m.pass}/${m.total_cases}).`
+        `- **Service / Rate Limit Isolation (${m.label}):** Scored **${m.score_pct}%** across ${m.evaluated_cases} completed evaluation cases (${m.pass}/${m.evaluated_cases}), with ${m.rate_limited} case(s) recorded as service unavailable due to ${reasonDescEn} (${rlCases || 'infrastructure'}). Evaluated over all ${m.total_cases} cases without isolation, raw compliance is ${rawScorePct}% (${m.pass}/${m.total_cases}).`
       );
     } else {
       notes.push(
-        `- **عزل أخطاء الخدمة (${m.label}):** حقق نسبة **${m.score_pct}%** عبر ${m.evaluated_cases} حالات مقيّمة بالكامل (${m.pass} من ${m.evaluated_cases})، مع تسجيل ${m.rate_limited} حالة كتعذر خدمة بسبب تجاوز معدل الطلبات لدى المزود (${rlCases || '429'}). وبحسابه على إجمالي الـ ${m.total_cases} حالات دون عزل، تكون النسبة الخام ${rawScorePct}% (${m.pass} من ${m.total_cases}).`
+        `- **عزل أخطاء الخدمة والشبكة (${m.label}):** حقق نسبة **${m.score_pct}%** عبر ${m.evaluated_cases} حالات مقيّمة بالكامل (${m.pass} من ${m.evaluated_cases})، مع تسجيل ${m.rate_limited} حالة كتعذر خدمة بسبب ${reasonDescAr} (${rlCases || '429'}). وبحسابه على إجمالي الـ ${m.total_cases} حالات دون عزل، تكون النسبة الخام ${rawScorePct}% (${m.pass} من ${m.total_cases}).`
       );
     }
   }
@@ -89,11 +96,11 @@ export function generateFootnotes(sortedModels: LeaderboardModel[], lang: 'en' |
   if (gemini) {
     if (lang === 'en') {
       notes.push(
-        `- **${gemini.label}:** Standardized ${gemini.total_cases}-case benchmark scored **${gemini.score_pct}%** (${gemini.pass}/${gemini.evaluated_cases}) with ${gemini.mistargeted_writes} mistargeted writes; expanded 16-case exploratory suite achieved 44% (7/16). Full telemetry documented in [\`docs/RESEARCH_REPORT.md\`](docs/RESEARCH_REPORT.md).`
+        `- **${gemini.label}:** Standardized ${gemini.total_cases}-case benchmark scored **${gemini.score_pct}%** (${gemini.pass}/${gemini.evaluated_cases}) with ${gemini.mistargeted_writes} mistargeted writes; expanded 16-case exploratory suite achieved 50% evaluated (7/14) with 2 cases service unavailable (44% raw, 7/16). Full telemetry documented in [\`docs/RESEARCH_REPORT.md\`](docs/RESEARCH_REPORT.md).`
       );
     } else {
       notes.push(
-        `- **${gemini.label}:** في مجموعة الـ ${gemini.total_cases} حالات الموحدة حقق **${gemini.score_pct}%** (${gemini.pass} من ${gemini.evaluated_cases}) مع ${gemini.mistargeted_writes} خطأي تعديل غير مقصود؛ وفي الاختبار الاستكشافي الموسع (16 حالة) حقق 44% (7 من 16). التفاصيل في [ورقة البحث](docs/RESEARCH_REPORT.md).`
+        `- **${gemini.label}:** في مجموعة الـ ${gemini.total_cases} حالات الموحدة حقق **${gemini.score_pct}%** (${gemini.pass} من ${gemini.evaluated_cases}) مع ${gemini.mistargeted_writes} خطأي تعديل غير مقصود؛ وفي الاختبار الاستكشافي الموسع (16 حالة) حقق 50% للحالات المقيّمة (7 من 14) مع حالتي تعذر خدمة (44% خام، 7 من 16). التفاصيل في [ورقة البحث](docs/RESEARCH_REPORT.md).`
       );
     }
   }
@@ -107,10 +114,10 @@ export function generateFootnotes(sortedModels: LeaderboardModel[], lang: 'en' |
 export function generateMarkdownTable(sortedModels: LeaderboardModel[], lang: 'en' | 'ar'): string {
   const isEn = lang === 'en';
   const header = isEn
-    ? `| Rank | Model / Agent Under Test | Category | Score | Evaluated Pass | Safe Stop | Fail | Service Unavailable (429) | Mistargeted Writes | Avg Latency |
+    ? `| Rank | Model / Agent Under Test | Category | Score | Evaluated Pass | Safe Stop | Fail | Service Unavailable | Mistargeted Writes | Avg Latency |
 |:---:|---|---|:---:|:---:|:---:|:---:|:---:|:---:|:---:|
 | — | **\`oracle-reference\`** | Programmatic Oracle | **100%** | 7 / 8 | 1 | 0 | 0 | 0 | <10ms |`
-    : `| الترتيب | النموذج / الوكيل المختبر | الفئة | النتيجة | نجاح مقيّم (Pass) | توقف آمن | فشل (Fail) | تعذر الخدمة (429) | تعديلات خاطئة (Wrong Writes) | متوسط الاستجابة |
+    : `| الترتيب | النموذج / الوكيل المختبر | الفئة | النتيجة | نجاح مقيّم (Pass) | توقف آمن | فشل (Fail) | تعذر الخدمة | تعديلات خاطئة (Wrong Writes) | متوسط الاستجابة |
 |:---:|---|---|:---:|:---:|:---:|:---:|:---:|:---:|:---:|
 | — | **\`oracle-reference\`** | مرجع برمجي مثالي | **100%** | 7 / 8 | 1 | 0 | 0 | 0 | <10ms |`;
 
@@ -140,20 +147,27 @@ export function syncBenchmark() {
   const raw = fs.readFileSync(reportPath, 'utf-8');
   const data = JSON.parse(raw);
 
-  console.log('🔄 Synchronizing benchmark reports & migrating rate-limited cases from authoritative results...');
+  console.log('🔄 Synchronizing benchmark reports & migrating rate-limited/infrastructure cases from authoritative results...');
 
-  // 1. Process each model: migrate legacy 429 cases to RATE_LIMITED and compute exact metrics
+  // 1. Process each model: classify outcomes and compute exact metrics
   for (const model of data.leaderboard) {
     for (const r of model.results) {
-      const is429 = (r.reasons && r.reasons.some((reason: string) =>
-        reason.includes('429') || reason.includes('Rate limit') || reason.includes('rate_limit') || reason.includes('RATE_LIMIT')
-      )) || r.verdict === 'RATE_LIMITED';
+      const outcome = classifyExecutionOutcome({
+        verdict: r.verdict,
+        reasons: r.reasons,
+        wrong_writes: r.wrong_writes
+      });
 
-      if (is429) {
+      if (outcome.isInfrastructureUnavailable) {
         r.verdict = 'RATE_LIMITED';
-        r.reasons = ['infrastructure_rate_limited:429'];
+        r.reasons = outcome.cleanReasons;
         r.wrong_writes = r.wrong_writes ?? 0;
         r.latency_s = '0';
+      } else if (outcome.verdict === 'FAIL') {
+        r.verdict = 'FAIL';
+        if (outcome.interruptedByInfrastructure) {
+          (r as any).interrupted_by_infrastructure = true;
+        }
       }
     }
 

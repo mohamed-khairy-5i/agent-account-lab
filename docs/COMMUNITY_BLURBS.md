@@ -39,10 +39,8 @@
 **ما يقدمه الأساس الحالي للمشروع:**
 - **١٠٠ حالة اختبار** مبنية من ٢٠ سيناريو أساسي و٥ نسخ تعكس الترتيب، وتقلب الحساب الافتراضي، وتحقن حسابات تمويه (Decoys).
 - **محرك تقييم حتمي** يطبق ١٢ قاعدة صارمة للتفريق بين محاولة الخطأ والأثر الفعلي المكتوب.
-- **تأسيس نظيف ومحلي 100%**: مبني بـ TypeScript وNode.js >=20، مع تدقيق أنواع صارم واختبارات مؤتمتة بالكامل (69 اختبار ناجح).
-- **شفافية مطلقة**: لا ندّعي نتائج أداء لنماذج حقيقية حتى الآن؛ النتائج الحالية تعتمد على مرجع يعرف الإجابة لفحص دقة المختبر نفسه وضوابط سلبية مبرمجة.
-
-الخطوات القادمة تشمل بناء واجهة تفاعلية محلية (React/Vite) وتوصيل نموذج لغوي واحد تحت قيود ميزانية صارمة.
+- **تأسيس نظيف ومحلي 100%**: مبني بـ TypeScript وNode.js >=20، مع تدقيق أنواع صارم واختبارات مؤتمتة بالكامل (71 اختبار ناجح).
+- **واجهة تفاعلية وموصل نماذج**: واجهة محلية متكاملة (React 19 + Vite 6) وموصل متوافق مع OpenAI API يدعم قيود الميزانية والمهلة وعزل أخطاء 429.
 
 المستودع مفتوح بالكامل للجميع:
 https://github.com/mohamed-khairy-5i/agent-account-lab
@@ -61,7 +59,7 @@ https://github.com/mohamed-khairy-5i/agent-account-lab
 > Current runnable foundation:
 > ▫️ 20 base scenarios expanding to 100 cases across 5 permutations (order reversal, default flips, decoys).
 > ▫️ 6 in-memory mock tools + deterministic evaluator.
-> ▫️ Strict TypeScript, Node 24+, 63 passing tests, reproducible frontier benchmark.
+> ▫️ Strict TypeScript, Node 22/24, 71 passing tests, reproducible frontier benchmark.
 > 
 > Repo: https://github.com/mohamed-khairy-5i/agent-account-lab
 
@@ -85,10 +83,8 @@ A position-biased or naive agent calls `rename_file` on the personal account.
 **What is implemented today:**
 - **100 generated cases** from 20 base scenarios exploring order reversal, flipped defaults, decoy accounts, and folder-name vs. account confusion.
 - **In-memory mock tools & deterministic evaluator**: Isolates run state, enforces explicit account parameters, and separates attempted mistakes from actual executed side effects.
-- **Strict TypeScript & Node 24+**: Zero external runtime dependencies, 63 automated tests, CI configured.
-- **Disclosed baseline**: 0 real model calls yet. Evaluated against an oracle reference (for harness verification) and weak position-biased negative controls.
-
-Next steps: interactive local React UI and a single sandboxed LLM adapter with strict token/budget ceilings.
+- **Strict TypeScript & Node 22/24**: Zero external runtime dependencies, 71 automated tests, CI configured.
+- **Interactive Local UI & Adapter**: Full React 19 + Vite 6 UI and OpenAI-compatible adapter with budget ceilings and 429 rate limit isolation.
 
 Repo: https://github.com/mohamed-khairy-5i/agent-account-lab
 Contributions and feedback on tricky multi-account edge cases are very welcome!

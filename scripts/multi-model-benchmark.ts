@@ -3,6 +3,10 @@ import { loadScenarios, loadTools, loadRules } from '../src/data.ts';
 import { generateCases } from '../src/variants.ts';
 import { runCase } from '../src/runner.ts';
 import { makeOpenAICompatibleAdapter } from '../src/adapters/openai-compatible.ts';
+import { classifyExecutionOutcome, aggregateRetrySideEffects, isInfrastructureError } from '../src/classification.ts';
+
+// Re-export pure helper for unit tests
+export { aggregateRetrySideEffects };
 
 // Load .env
 const envFile = readFileSync(new URL('../.env', import.meta.url), 'utf8');
@@ -106,26 +110,32 @@ for (const modelConfig of MODELS_TO_EVALUATE) {
         const duration = ((Date.now() - startTime) / 1000);
 
         const currentAttemptWrongWrites = res.metrics?.mistargeted_write_effects || 0;
-        accumulatedWrongWrites = Math.max(accumulatedWrongWrites, currentAttemptWrongWrites);
+        accumulatedWrongWrites = aggregateRetrySideEffects(accumulatedWrongWrites, currentAttemptWrongWrites);
 
-        // Check if the run failed due to 429 rate limit
-        const isRateLimited = res.reasons.some(r => r.includes('429') || r.includes('Rate limit') || r.includes('RATE_LIMIT'));
-        if (isRateLimited && attempt < maxCaseRetries) {
-          console.log(`    ⚠️ Transient 429 rate limit hit on attempt ${attempt} (accumulated side effects: ${accumulatedWrongWrites}). Backing off for 7s...`);
+        // Check if the run was interrupted by an infrastructure error (429, network, timeout)
+        const hasInfraError = res.reasons.some(isInfrastructureError);
+        if (hasInfraError && attempt < maxCaseRetries) {
+          console.log(`    ⚠️ Transient infrastructure interruption on attempt ${attempt} (accumulated side effects: ${accumulatedWrongWrites}). Backing off for 7s...`);
           await new Promise(r => setTimeout(r, 7000));
           continue;
         }
 
         totalLatency += duration;
+        const finalWrongWrites = aggregateRetrySideEffects(accumulatedWrongWrites, res.metrics?.mistargeted_write_effects || 0);
+        if (finalWrongWrites > 0) {
+          modelWrongWrites += finalWrongWrites;
+        }
 
-        if (isRateLimited) {
-          // If 429 rate limit persisted even after exhausting case retries,
-          // isolate it as infrastructure unavailability, BUT NEVER erase any executed side effects!
+        // Authoritatively classify the execution outcome
+        const outcome = classifyExecutionOutcome({
+          verdict: res.verdict,
+          reasons: res.reasons,
+          metrics: res.metrics,
+          wrong_writes: finalWrongWrites
+        });
+
+        if (outcome.isInfrastructureUnavailable) {
           modelRateLimited++;
-          const finalWrongWrites = Math.max(accumulatedWrongWrites, res.metrics?.mistargeted_write_effects || 0);
-          if (finalWrongWrites > 0) {
-            modelWrongWrites += finalWrongWrites;
-          }
           modelResults.push({
             case_id: tc.case_id,
             verdict: 'RATE_LIMITED',
@@ -134,65 +144,61 @@ for (const modelConfig of MODELS_TO_EVALUATE) {
             wrong_writes: finalWrongWrites,
             rate_limit_retries: attempt - 1
           });
-          console.log(`    ⚠️ Infrastructure Service Unavailable (429 Rate Limit after ${attempt} attempts, wrong_writes: ${finalWrongWrites})`);
+          console.log(`    ⚠️ Infrastructure Service Unavailable (Interrupted after ${attempt} attempts, wrong_writes: ${finalWrongWrites})`);
           caseSuccess = true;
           continue;
         }
 
-        if (res.verdict === 'PASS') modelPass++;
-        else if (res.verdict === 'SAFE_STOP') modelSafeStop++;
+        if (outcome.verdict === 'PASS') modelPass++;
+        else if (outcome.verdict === 'SAFE_STOP') modelSafeStop++;
         else modelFail++;
-
-        const finalWrongWrites = Math.max(accumulatedWrongWrites, res.metrics?.mistargeted_write_effects || 0);
-        if (finalWrongWrites > 0) {
-          modelWrongWrites += finalWrongWrites;
-        }
 
         modelResults.push({
           case_id: tc.case_id,
-          verdict: res.verdict,
+          verdict: outcome.verdict,
           reasons: res.reasons,
           latency_s: duration.toFixed(1),
           wrong_writes: finalWrongWrites,
           rate_limit_retries: attempt - 1
         });
 
-        const icon = res.verdict === 'PASS' ? '✅' : (res.verdict === 'SAFE_STOP' ? '⏸️' : '❌');
-        console.log(`    Result: ${icon} ${res.verdict} (${duration.toFixed(1)}s, wrong_writes: ${finalWrongWrites})`);
+        const icon = outcome.verdict === 'PASS' ? '✅' : (outcome.verdict === 'SAFE_STOP' ? '⏸️' : '❌');
+        console.log(`    Result: ${icon} ${outcome.verdict} (${duration.toFixed(1)}s, wrong_writes: ${finalWrongWrites})`);
         if (res.reasons.length > 0) console.log(`    Reasons: ${JSON.stringify(res.reasons)}`);
         caseSuccess = true;
       } catch (err: any) {
-        const isRateLimit = err.message.includes('429') || err.message.includes('Rate limit') || err.message.includes('RATE_LIMIT');
-        if (isRateLimit && attempt < maxCaseRetries) {
-          console.log(`    ⚠️ Caught 429 error on attempt ${attempt}. Waiting 7s before retry...`);
+        const isInfra = isInfrastructureError(err.message);
+        if (isInfra && attempt < maxCaseRetries) {
+          console.log(`    ⚠️ Caught infrastructure error on attempt ${attempt}: ${err.message}. Waiting 7s before retry...`);
           await new Promise(r => setTimeout(r, 7000));
           continue;
         }
 
-        if (isRateLimit) {
-          // Isolate 429 infrastructure exhaustion from model behavioral evaluation,
-          // while preserving any side effects recorded across previous attempts!
+        if (accumulatedWrongWrites > 0) {
+          modelWrongWrites += accumulatedWrongWrites;
+        }
+
+        const outcome = classifyExecutionOutcome({
+          reasons: [`execution_error:${err.message}`],
+          wrong_writes: accumulatedWrongWrites
+        });
+
+        if (outcome.isInfrastructureUnavailable) {
           modelRateLimited++;
-          if (accumulatedWrongWrites > 0) {
-            modelWrongWrites += accumulatedWrongWrites;
-          }
           modelResults.push({
             case_id: tc.case_id,
             verdict: 'RATE_LIMITED',
-            reasons: [`infrastructure_rate_limited:${err.message}`],
+            reasons: [`infrastructure_unavailable:${err.message}`],
             latency_s: '0',
             wrong_writes: accumulatedWrongWrites,
             rate_limit_retries: attempt - 1
           });
-          console.log(`    ⚠️ Infrastructure Rate Limit Exceeded (isolated from model score): ${err.message} (wrong_writes: ${accumulatedWrongWrites})`);
+          console.log(`    ⚠️ Infrastructure Service Unavailable (isolated from model score): ${err.message} (wrong_writes: ${accumulatedWrongWrites})`);
           caseSuccess = true;
           continue;
         }
 
         modelFail++;
-        if (accumulatedWrongWrites > 0) {
-          modelWrongWrites += accumulatedWrongWrites;
-        }
         modelResults.push({
           case_id: tc.case_id,
           verdict: 'FAIL',

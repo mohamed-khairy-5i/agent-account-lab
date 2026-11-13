@@ -3,6 +3,7 @@ import { loadScenarios, loadTools, loadRules } from '../src/data.ts';
 import { generateCases } from '../src/variants.ts';
 import { runCase } from '../src/runner.ts';
 import { makeOpenAICompatibleAdapter } from '../src/adapters/openai-compatible.ts';
+import { classifyExecutionOutcome } from '../src/classification.ts';
 
 // Load .env
 const envFile = readFileSync(new URL('../.env', import.meta.url), 'utf8');
@@ -62,31 +63,43 @@ for (let i = 0; i < selectedCases.length; i++) {
     const res = await runCase(tc, adapter, tools, rules.max_tool_calls || 12);
     const duration = ((Date.now() - startTime) / 1000).toFixed(1);
 
+    const outcome = classifyExecutionOutcome({
+      verdict: res.verdict,
+      reasons: res.reasons,
+      metrics: res.metrics,
+      wrong_writes: res.metrics.mistargeted_write_effects
+    });
+
     benchmarkResults.push({
       case_id: tc.case_id,
       base_id: tc.scenario.id,
       variant: tc.variant,
       category: tc.scenario.category,
-      verdict: res.verdict,
+      verdict: outcome.verdict,
       reasons: res.reasons,
+      interrupted_by_infrastructure: outcome.interruptedByInfrastructure || undefined,
       duration_s: duration,
       tool_calls: res.metrics.tool_calls,
       mistargeted_writes: res.metrics.mistargeted_write_effects,
       trace_summary: res.trace.map(t => `${t.tool}(${JSON.stringify(t.args)})`)
     });
 
-    const icon = res.verdict === 'PASS' ? '✅' : (res.verdict === 'SAFE_STOP' ? '⏸️' : '❌');
-    console.log(`  Result: ${icon} ${res.verdict} (${duration}s, ${res.metrics.tool_calls} tool calls)`);
+    const icon = outcome.verdict === 'PASS' ? '✅' : (outcome.verdict === 'SAFE_STOP' ? '⏸️' : (outcome.verdict === 'INFRASTRUCTURE_UNAVAILABLE' ? '⚠️' : '❌'));
+    console.log(`  Result: ${icon} ${outcome.verdict} (${duration}s, ${res.metrics.tool_calls} tool calls)`);
     if (res.reasons.length > 0) console.log(`  Reasons: ${JSON.stringify(res.reasons)}`);
   } catch (err: any) {
     console.log(`  Execution Error: ${err.message}`);
+    const outcome = classifyExecutionOutcome({
+      reasons: [`execution_error:${err.message}`]
+    });
     benchmarkResults.push({
       case_id: tc.case_id,
       base_id: tc.scenario.id,
       variant: tc.variant,
       category: tc.scenario.category,
-      verdict: 'FAIL',
-      reasons: [`execution_error:${err.message}`]
+      verdict: outcome.verdict,
+      reasons: [`execution_error:${err.message}`],
+      interrupted_by_infrastructure: outcome.interruptedByInfrastructure || undefined
     });
   }
 
@@ -102,15 +115,20 @@ const total = benchmarkResults.length;
 const pass = benchmarkResults.filter(r => r.verdict === 'PASS').length;
 const safeStop = benchmarkResults.filter(r => r.verdict === 'SAFE_STOP').length;
 const fail = benchmarkResults.filter(r => r.verdict === 'FAIL').length;
+const serviceUnavailable = benchmarkResults.filter(r => r.verdict === 'INFRASTRUCTURE_UNAVAILABLE' || r.verdict === 'RATE_LIMITED').length;
+const evaluated = pass + safeStop + fail;
 const wrongWrites = benchmarkResults.filter(r => ((r as any).mistargeted_writes || 0) > 0).length;
 
 const summary = {
   model,
   total_cases: total,
+  evaluated_cases: evaluated,
+  service_unavailable: serviceUnavailable,
   pass,
   safe_stop: safeStop,
   fail,
-  pass_rate: `${Math.round(((pass + safeStop) / total) * 100)}%`,
+  pass_rate_evaluated: evaluated > 0 ? `${Math.round(((pass + safeStop) / evaluated) * 100)}%` : '0%',
+  pass_rate_raw: `${Math.round(((pass + safeStop) / total) * 100)}%`,
   mistargeted_writes: wrongWrites,
   timestamp: new Date().toISOString(),
   results: benchmarkResults
@@ -118,11 +136,11 @@ const summary = {
 
 console.log(`\n=======================================================`);
 console.log(`📊 FINAL BENCHMARK SCORE FOR ${model}`);
-console.log(`Total Cases Tested: ${total}`);
-console.log(`Passing (Compliant): ${pass} (${Math.round((pass / total) * 100)}%)`);
+console.log(`Total Cases Tested: ${total} (Evaluated: ${evaluated}, Service Unavailable: ${serviceUnavailable})`);
+console.log(`Passing (Compliant): ${pass} (${evaluated > 0 ? Math.round((pass / evaluated) * 100) : 0}% evaluated)`);
 console.log(`Safe Stops (Honest Clarification): ${safeStop}`);
 console.log(`Failures (Wrong Account Mutations): ${fail}`);
-console.log(`Overall Compliance Rate: ${summary.pass_rate}`);
+console.log(`Evaluated Compliance Rate: ${summary.pass_rate_evaluated} (Raw: ${summary.pass_rate_raw})`);
 console.log(`=======================================================`);
 
 writeFileSync(

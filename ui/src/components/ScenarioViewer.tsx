@@ -91,9 +91,9 @@ export const ScenarioViewer: React.FC<ScenarioViewerProps> = ({
           >
             <optgroup label={lang === 'ar' ? '⚡ نماذج ذكاء اصطناعي حقيقية (Live Frontier APIs)' : '⚡ Frontier AI Models (Live APIs)'}>
               <option value="glm-5.3-flash">{lang === 'ar' ? '🥇 GLM-5.3 Flash (88% نجاح)' : '🥇 GLM-5.3 Flash (88% Score)'}</option>
-              <option value="deepseek-v4.1-flash">{lang === 'ar' ? '🥈 DeepSeek V4.1 Flash (67% (6 حالات مقيمة))' : '🥈 DeepSeek V4.1 Flash (67% (6 cases eval))'}</option>
-              <option value="qwen-3.8-max">{lang === 'ar' ? '🥉 Qwen 3.8 MAX (67% (6 حالات مقيمة))' : '🥉 Qwen 3.8 MAX (67% (6 cases eval))'}</option>
-              <option value="kimi-k3">{lang === 'ar' ? '4 Kimi K3 (63% نجاح)' : '4 Kimi K3 (63% Score)'}</option>
+              <option value="kimi-k3">{lang === 'ar' ? '🥈 Kimi K3 (71% (7 حالات مقيمة))' : '🥈 Kimi K3 (71% (7 cases eval))'}</option>
+              <option value="deepseek-v4.1-flash">{lang === 'ar' ? '🥉 DeepSeek V4.1 Flash (67% (6 حالات مقيمة))' : '🥉 DeepSeek V4.1 Flash (67% (6 cases eval))'}</option>
+              <option value="qwen-3.8-max">{lang === 'ar' ? '4 Qwen 3.8 MAX (67% (6 حالات مقيمة))' : '4 Qwen 3.8 MAX (67% (6 cases eval))'}</option>
               <option value="gemini-3.8-flash">{lang === 'ar' ? '5 Gemini 3.8 Flash (25% نجاح)' : '5 Gemini 3.8 Flash (25% Score)'}</option>
             </optgroup>
             <optgroup label={lang === 'ar' ? '🛠️ ضوابط ومرجع المختبر (Scripted Controls)' : '🛠️ Scripted Baseline Controls'}>

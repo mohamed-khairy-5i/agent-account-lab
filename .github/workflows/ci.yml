@@ -25,6 +25,9 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Install UI dependencies
+        run: npm --prefix ui ci
+
       - name: Validate scenario integrity
         run: npm run validate
 
@@ -39,9 +42,6 @@ jobs:
 
       - name: Run simulation demo
         run: npm run demo
-
-      - name: Install UI dependencies
-        run: npm --prefix ui ci
 
       - name: Build UI production bundle
         run: npm run ui:build
