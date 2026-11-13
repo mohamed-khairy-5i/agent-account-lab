@@ -35,15 +35,16 @@ Empirical evaluation of frontier LLMs against the Agent Account Lab standardized
 |:---:|---|---|:---:|:---:|:---:|:---:|:---:|:---:|:---:|
 | — | **`oracle-reference`** | Programmatic Oracle | **100%** | 8 / 8 | 0 | 0 | 0 | 0 | <10ms |
 | 🥇 | **GLM-5.3 Flash** (`free/glm-5.3-flash`) | Frontier LLM | **88%** | 7 / 8 | 0 | 1 | 0 | **0** | 13.1s |
-| 🥈 | **Kimi K3** (`free/kimi-k3`) | Frontier LLM | **63%** | 5 / 8 | 0 | 3 | 0 | 2 | 15.8s |
-| 🥉 | **DeepSeek V4.1 Flash** (`free/deepseek-v4.1-flash`)* | Frontier LLM | **67%** | 4 / 6 | 0 | 2 | 2 | 2 | 8.2s |
-| 4 | **Qwen 3.8 MAX** (`free/qwen-3.8-max`)* | Frontier LLM | **67%** | 4 / 6 | 0 | 2 | 2 | 2 | 9.0s |
+| 🥈 | **DeepSeek V4.1 Flash** (`free/deepseek-v4.1-flash`)* | Frontier LLM | **67%** | 4 / 6 | 0 | 2 | 2 | 2 | 8.2s |
+| 🥉 | **Qwen 3.8 MAX** (`free/qwen-3.8-max`)* | Frontier LLM | **67%** | 4 / 6 | 0 | 2 | 2 | 2 | 9.0s |
+| 4 | **Kimi K3** (`free/kimi-k3`) | Frontier LLM | **63%** | 5 / 8 | 0 | 3 | 0 | 2 | 15.8s |
 | 5 | **Gemini 3.8 Flash** (`free/gemini-3.8-flash`)* | Frontier LLM | **25%** | 2 / 8 | 0 | 6 | 0 | 2 | 5.2s |
 | — | **`first_account` Baseline** | Negative Control | **34%** | 34 / 100 | 0 | 66 | 0 | 47 | <10ms |
 | — | **`default_account` Baseline** | Negative Control | **31%** | 31 / 100 | 0 | 69 | 0 | 50 | <10ms |
 
 **Notes on evaluation conditions:*
-- **Rate Limit Isolation (429):** DeepSeek V4.1 Flash and Qwen 3.8 MAX achieved **67%** across 6 completed evaluation cases (4/6), with 2 cases recorded as service unavailable due to upstream provider rate limits (S01, S08). Evaluated over all 8 cases without rate-limit isolation, raw compliance is 50% (4/8).
+- **Rate Limit Isolation (DeepSeek V4.1 Flash):** Scored **67%** across 6 completed evaluation cases (4/6), with 2 case(s) recorded as service unavailable due to upstream provider rate limits (S01__base, S08__base). Evaluated over all 8 cases without rate-limit isolation, raw compliance is 50% (4/8).
+- **Rate Limit Isolation (Qwen 3.8 MAX):** Scored **67%** across 6 completed evaluation cases (4/6), with 2 case(s) recorded as service unavailable due to upstream provider rate limits (S01__base, S08__base). Evaluated over all 8 cases without rate-limit isolation, raw compliance is 50% (4/8).
 - **Gemini 3.8 Flash:** Standardized 8-case benchmark scored **25%** (2/8) with 2 mistargeted writes; expanded 16-case exploratory suite achieved 44% (7/16). Full telemetry documented in [`docs/RESEARCH_REPORT.md`](docs/RESEARCH_REPORT.md).
 ---
 

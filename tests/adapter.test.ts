@@ -6,6 +6,7 @@ import { loadScenarios, loadTools, loadRules } from '../src/data.ts';
 import { generateCases } from '../src/variants.ts';
 import { runCase } from '../src/runner.ts';
 import type { AgentContext, ToolDefinition } from '../src/types.ts';
+import { sortLeaderboard, getRankBadge, generateFootnotes, generateMarkdownTable } from '../scripts/sync-benchmark-reports.ts';
 
 test('isClarificationAnswer accurately classifies Arabic and English safe-stop statements', () => {
   // Test phrases from code review
@@ -333,4 +334,66 @@ test('Multi-model benchmark JSON report is internally consistent across all mode
     const expectedScore = Math.round(((pass + safe_stop) / (pass + safe_stop + fail || 1)) * 100);
     assert.equal(model.score_pct, expectedScore, `${model.label}: Score percentage mismatch`);
   }
+});
+
+test('Benchmark generator dynamically reorders leaderboard, medals, and footnotes when results change', () => {
+  // Alter results to test dynamic ranking & footnote generation:
+  // Kimi: 7 passes out of 8 -> 88%
+  // DeepSeek: 3 passes out of 5 evaluated (2 rate-limited) -> 60%, raw 38% (3/8)
+  // GLM: 4 passes out of 8 -> 50%
+  const mockModels: any[] = [
+    {
+      model_id: 'free/glm-5.3-flash',
+      label: 'GLM-5.3 Flash',
+      pass: 4, safe_stop: 0, fail: 4, rate_limited: 0, evaluated_cases: 8, total_cases: 8,
+      score_pct: 50, mistargeted_writes: 0, avg_latency_s: '13.1',
+      results: []
+    },
+    {
+      model_id: 'free/kimi-k3',
+      label: 'Kimi K3',
+      pass: 7, safe_stop: 0, fail: 1, rate_limited: 0, evaluated_cases: 8, total_cases: 8,
+      score_pct: 88, mistargeted_writes: 1, avg_latency_s: '14.0',
+      results: []
+    },
+    {
+      model_id: 'free/deepseek-v4.1-flash',
+      label: 'DeepSeek V4.1 Flash',
+      pass: 3, safe_stop: 0, fail: 2, rate_limited: 2, evaluated_cases: 5, total_cases: 8,
+      score_pct: 60, mistargeted_writes: 2, avg_latency_s: '8.0',
+      results: [
+        { case_id: 'S01__base', verdict: 'RATE_LIMITED' },
+        { case_id: 'S08__base', verdict: 'RATE_LIMITED' }
+      ]
+    }
+  ];
+
+  const sorted = sortLeaderboard(mockModels);
+  // Assert rank order recomputed dynamically
+  assert.equal(sorted[0].label, 'Kimi K3', 'Rank 1 must be Kimi K3 with 88%');
+  assert.equal(getRankBadge(0), '🥇');
+
+  assert.equal(sorted[1].label, 'DeepSeek V4.1 Flash', 'Rank 2 must be DeepSeek with 60%');
+  assert.equal(getRankBadge(1), '🥈');
+
+  assert.equal(sorted[2].label, 'GLM-5.3 Flash', 'Rank 3 must be GLM with 50%');
+  assert.equal(getRankBadge(2), '🥉');
+
+  // Assert English footnotes dynamically generated for DeepSeek with exact dynamic calculations
+  const footnotesEn = generateFootnotes(sorted, 'en');
+  assert(footnotesEn.includes('3/5'), 'Footnote should state 3/5 completed evaluations');
+  assert(footnotesEn.includes('38% (3/8)'), 'Footnote should calculate raw compliance 38% (3/8)');
+  assert(!footnotesEn.includes('50% (4/8)'), 'Footnote must NOT contain hardcoded 50% (4/8)');
+
+  // Assert Arabic footnotes dynamically generated with exact dynamic calculations
+  const footnotesAr = generateFootnotes(sorted, 'ar');
+  assert(footnotesAr.includes('3 من 5'), 'Arabic footnote should state 3 من 5');
+  assert(footnotesAr.includes('38% (3 من 8)'), 'Arabic footnote should calculate raw 38% (3 من 8)');
+  assert(!footnotesAr.includes('50% (4 من 8)'), 'Arabic footnote must NOT contain hardcoded 50% (4 من 8)');
+
+  // Assert table formatting uses dynamic medals matching the new ranks
+  const tableEn = generateMarkdownTable(sorted, 'en');
+  assert(tableEn.includes('🥇 | **Kimi K3**'), 'Kimi should have gold medal in table');
+  assert(tableEn.includes('🥈 | **DeepSeek V4.1 Flash**'), 'DeepSeek should have silver medal in table');
+  assert(tableEn.includes('🥉 | **GLM-5.3 Flash**'), 'GLM should have bronze medal in table');
 });

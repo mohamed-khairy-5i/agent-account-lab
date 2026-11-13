@@ -109,19 +109,7 @@
 
   <!-- Bar 3: Kimi K3 (63%) -->
   <g transform="translate(36, 179)">
-    <text x="188" y="19" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="12" font-weight="600" fill="#a5b4fc" text-anchor="end">🥈 Kimi K3</text>
-    <text x="188" y="32" font-family="'JetBrains Mono', monospace" font-size="10" fill="#71717a" text-anchor="end">Frontier LLM (N=8)</text>
-    
-    <rect x="204" y="8" width="500" height="24" rx="5" fill="#18181b" />
-    <rect x="204" y="8" width="315" height="24" rx="5" fill="url(#barKimi)" />
-    <text x="528" y="25" font-family="'JetBrains Mono', monospace" font-size="12" font-weight="700" fill="#a5b4fc">63%</text>
-    <rect x="752" y="10" width="48" height="18" rx="4" fill="#4c0519" />
-    <text x="776" y="23" font-family="'JetBrains Mono', monospace" font-size="10" font-weight="700" fill="#fda4af" text-anchor="middle">2 errs</text>
-  </g>
-
-  <!-- Bar 4: DeepSeek V4.1 Flash (50%) -->
-  <g transform="translate(36, 221)">
-    <text x="188" y="19" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="12" font-weight="600" fill="#38bdf8" text-anchor="end">🥉 DeepSeek V4.1 Flash</text>
+    <text x="188" y="19" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="12" font-weight="600" fill="#38bdf8" text-anchor="end">🥈 DeepSeek V4.1 Flash</text>
     <text x="188" y="32" font-family="'JetBrains Mono', monospace" font-size="10" fill="#71717a" text-anchor="end">6 eval, 2 rate-limited</text>
     
     <rect x="204" y="8" width="500" height="24" rx="5" fill="#18181b" />
@@ -131,9 +119,9 @@
     <text x="776" y="23" font-family="'JetBrains Mono', monospace" font-size="10" font-weight="700" fill="#fda4af" text-anchor="middle">2 errs</text>
   </g>
 
-  <!-- Bar 5: Qwen 3.8 MAX (50%) -->
-  <g transform="translate(36, 263)">
-    <text x="188" y="19" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="12" font-weight="600" fill="#c084fc" text-anchor="end">Qwen 3.8 MAX</text>
+  <!-- Bar 4: DeepSeek V4.1 Flash (50%) -->
+  <g transform="translate(36, 221)">
+    <text x="188" y="19" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="12" font-weight="600" fill="#c084fc" text-anchor="end">🥉 Qwen 3.8 MAX</text>
     <text x="188" y="32" font-family="'JetBrains Mono', monospace" font-size="10" fill="#71717a" text-anchor="end">6 eval, 2 rate-limited</text>
     
     <rect x="204" y="8" width="500" height="24" rx="5" fill="#18181b" />
@@ -143,9 +131,21 @@
     <text x="776" y="23" font-family="'JetBrains Mono', monospace" font-size="10" font-weight="700" fill="#fda4af" text-anchor="middle">2 errs</text>
   </g>
 
+  <!-- Bar 5: Qwen 3.8 MAX (50%) -->
+  <g transform="translate(36, 263)">
+    <text x="188" y="19" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="12" font-weight="600" fill="#a5b4fc" text-anchor="end">4 Kimi K3</text>
+    <text x="188" y="32" font-family="'JetBrains Mono', monospace" font-size="10" fill="#71717a" text-anchor="end">Frontier LLM (N=8)</text>
+    
+    <rect x="204" y="8" width="500" height="24" rx="5" fill="#18181b" />
+    <rect x="204" y="8" width="315" height="24" rx="5" fill="url(#barKimi)" />
+    <text x="528" y="25" font-family="'JetBrains Mono', monospace" font-size="12" font-weight="700" fill="#a5b4fc">63%</text>
+    <rect x="752" y="10" width="48" height="18" rx="4" fill="#4c0519" />
+    <text x="776" y="23" font-family="'JetBrains Mono', monospace" font-size="10" font-weight="700" fill="#fda4af" text-anchor="middle">2 errs</text>
+  </g>
+
   <!-- Bar 6: Gemini 3.8 Flash (44%) -->
   <g transform="translate(36, 305)">
-    <text x="188" y="19" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="12" font-weight="600" fill="#fcd34d" text-anchor="end">Gemini 3.8 Flash</text>
+    <text x="188" y="19" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="12" font-weight="600" fill="#fcd34d" text-anchor="end">5 Gemini 3.8 Flash</text>
     <text x="188" y="32" font-family="'JetBrains Mono', monospace" font-size="10" fill="#71717a" text-anchor="end">Frontier LLM (N=8)</text>
     
     <rect x="204" y="8" width="500" height="24" rx="5" fill="#18181b" />
