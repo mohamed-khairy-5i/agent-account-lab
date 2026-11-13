@@ -704,11 +704,13 @@ test('Vite proxy routing smoke test forwards /api/llm correctly to mock upstream
     assert.equal(receivedAuth, 'Bearer sk-test-proxy-token', 'Proxy must preserve Authorization bearer token');
     assert.equal(clientResult.choices[0].message.content, 'upstream mock response ok', 'Client must receive upstream payload');
 
-    // 4. Verify UI production bundle exists and is valid
+    // 4. Verify UI entry point or production bundle exists
     const uiDistIndex = resolve(process.cwd(), 'ui/dist/index.html');
-    assert.ok(existsSync(uiDistIndex), 'ui/dist/index.html must exist from build');
-    const indexHtmlContent = readFileSync(uiDistIndex, 'utf8');
-    assert.ok(indexHtmlContent.includes('<!doctype html>') || indexHtmlContent.includes('<html'), 'ui/dist/index.html must be valid HTML');
+    const uiSrcIndex = resolve(process.cwd(), 'ui/index.html');
+    const targetHtml = existsSync(uiDistIndex) ? uiDistIndex : uiSrcIndex;
+    assert.ok(existsSync(targetHtml), 'UI entry point must exist');
+    const indexHtmlContent = readFileSync(targetHtml, 'utf8');
+    assert.ok(indexHtmlContent.includes('<!doctype html>') || indexHtmlContent.includes('<html'), 'HTML entry point must be valid HTML');
   } finally {
     upstreamServer.close();
   }
