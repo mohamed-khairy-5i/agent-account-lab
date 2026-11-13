@@ -7,9 +7,11 @@
 <p align="center">
   <a href=".github/workflows/ci.yml"><img src="https://img.shields.io/badge/CI-ناجح-10b981?style=flat-square&logo=github-actions" alt="CI Status" /></a>
   <a href="tsconfig.json"><img src="https://img.shields.io/badge/TypeScript-Strict_5.9-3178c6?style=flat-square&logo=typescript" alt="TypeScript Strict" /></a>
-  <a href="tests"><img src="https://img.shields.io/badge/الاختبارات-52%2F52_ناجحة-10b981?style=flat-square" alt="Tests 52/52 Passing" /></a>
+  <a href="tests"><img src="https://img.shields.io/badge/الاختبارات-61%2F61_ناجحة-10b981?style=flat-square" alt="Tests 61/61 Passing" /></a>
   <a href="docs/RESEARCH_REPORT.md"><img src="https://img.shields.io/badge/تقييم_النماذج-8_وكلاء-818cf8?style=flat-square" alt="Frontier Benchmark" /></a>
   <a href="package.json"><img src="https://img.shields.io/badge/Node.js-%3E%3D20.0.0-339933?style=flat-square&logo=node.js" alt="Node Version" /></a>
+  <a href="SECURITY.md"><img src="https://img.shields.io/badge/سياسة_الأمان-معتمدة-blue.svg?style=flat-square" alt="Security Policy" /></a>
+  <a href="CODE_OF_CONDUCT.md"><img src="https://img.shields.io/badge/ميثاق_السلوك-v2.1-4baaaa.svg?style=flat-square" alt="Code of Conduct" /></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/الترخيص-MIT-yellow.svg?style=flat-square" alt="License MIT" /></a>
   <a href="CONTRIBUTING.md"><img src="https://img.shields.io/badge/المساهمات-مرحّب_بها-brightgreen.svg?style=flat-square" alt="PRs Welcome" /></a>
 </p>
@@ -100,7 +102,64 @@
 - **أتمتة الفحص والتكامل المستمر (CI)** عبر GitHub Actions في `.github/workflows/ci.yml`.
 - **موصلات نماذج ذكية حقيقية** متوافقة مع واجهات OpenAI API وتدعم إعادة المحاولة التلقائية ومقاومة قيود الاستدعاء (Rate Limits).
 - **واجهة ويب تفاعلية محلية (React 19 + Vite)** بتصميم داكن احترافي، ودعم كامل للغة العربية (RTL)، ومولد مقارنة التعديلات.
-- **٥٢ اختبارًا وظيفيًا مؤتمتًا تمر جميعها بنجاح (٥٢ نجاح، صفر فشل)** بدون أي حزم تشغيل خارجية.
+- **٦١ اختبارًا وظيفيًا مؤتمتًا تمر جميعها بنجاح (٦١ نجاح، صفر فشل)** بدون أي حزم تشغيل خارجية.
+
+---
+
+## المعمارية البرمجية وتدفق التقييم (System Architecture)
+
+```mermaid
+flowchart TD
+    subgraph Input["📥 طبقة المدخلات (Input Layer)"]
+        U["طلب المستخدم الصريح<br><i>(Prompt with Multi-Account Context)</i>"]
+        S["بيانات العالم المصطنعة<br><i>(Personal & Work Accounts, Duplicate Files)</i>"]
+    end
+
+    subgraph Agent["🤖 الوكيل الخاضع للاختبار (Agent Under Test)"]
+        LLM["نموذج الذكاء الاصطناعي<br><i>(GLM-5.3, DeepSeek, Qwen, Kimi, Gemini)</i>"]
+    end
+
+    subgraph Gateway["🛡️ بوابة الأدوات الوهمية في الذاكرة (In-Memory Tools)"]
+        direction TB
+        T1["list_accounts()"]
+        T2["list_files(account_id)"]
+        T3["read_file(account_id, file_id)"]
+        T4["rename_file(account_id, file_id, new_name)"]
+        T5["move_file(account_id, file_id, target_folder)"]
+        T6["ask_user(question)"]
+    end
+
+    subgraph Engine["⚖️ محرك القواعد والحَكَم الحتمي (12 Rules)"]
+        TR["مسجل الأثر البرمجي<br><i>(Attempts vs. Executed Effects)</i>"]
+        EV["محرك التقييم والمقارنة"]
+        OR["الحقيقة الأساسية للمرجع<br><i>(Target Account & Intended Mutation)</i>"]
+    end
+
+    subgraph Verdict["📊 القرار والتقرير النهائي"]
+        P["✅ PASS (ناجح)<br><i>تنفيذ التعديل في الحساب الصحيح</i>"]
+        ST["⚠️ SAFE_STOP (توقف آمن)<br><i>استيضاح سليم عند الغموض</i>"]
+        F["❌ FAIL (فشل)<br><i>تعديل غير مقصود أو انحياز للموضع</i>"]
+    end
+
+    U --> LLM
+    S --> Gateway
+    LLM -->|"نداءات الأدوات (Tool Calls)"| Gateway
+    Gateway --> TR
+    TR --> EV
+    OR --> EV
+    EV --> P
+    EV --> ST
+    EV --> F
+
+    classDef pass fill:#064e3b,stroke:#10b981,stroke-width:2px,color:#ecfdf5;
+    classDef safe fill:#78350f,stroke:#f59e0b,stroke-width:2px,color:#fffbeb;
+    classDef fail fill:#7f1d1d,stroke:#ef4444,stroke-width:2px,color:#fef2f2;
+    classDef core fill:#1e1e2e,stroke:#6366f1,stroke-width:2px,color:#e0e7ff;
+    class P pass;
+    class ST safe;
+    class F fail;
+    class LLM,EV,TR core;
+```
 
 ---
 
@@ -214,6 +273,8 @@ npm run ui
 
 ## الوثائق التفصيلية
 - [دليل المساهمة في المشروع](CONTRIBUTING.md) ([بالعربية](docs/CONTRIBUTING_AR.md))
+- [سياسة الأمان والإبلاغ عن الثغرات](SECURITY.md)
+- [ميثاق السلوك للمجتمع](CODE_OF_CONDUCT.md)
 - [فهرس السيناريوهات العشرين](docs/SCENARIOS_AR.md)
 - [الأدوات الوهمية والأدوار](docs/TOOLS_AND_ROLES_AR.md)
 - [قواعد التقييم الاثنتا عشرة](docs/EVALUATION_RULES_AR.md)

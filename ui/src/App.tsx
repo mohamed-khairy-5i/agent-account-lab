@@ -16,6 +16,7 @@ export function App() {
   const [selectedVariant, setSelectedVariant] = useState<string>('base');
   const [selectedAgent, setSelectedAgent] = useState<AgentChoice>('first_account');
   const [result, setResult] = useState<SimulationResult | null>(null);
+  const [executionError, setExecutionError] = useState<string | null>(null);
   const [isRunning, setIsRunning] = useState<boolean>(false);
   const [isBatchMode, setIsBatchMode] = useState<boolean>(false);
   const [isApiKeyModalOpen, setIsApiKeyModalOpen] = useState<boolean>(false);
@@ -43,6 +44,7 @@ export function App() {
   const runSimulation = async (targetCase = currentCase, agent = selectedAgent) => {
     const runId = ++runIdRef.current;
     setIsRunning(true);
+    setExecutionError(null);
     try {
       const res = await harness.runSingle(targetCase, agent);
       if (runIdRef.current === runId) {
@@ -53,6 +55,7 @@ export function App() {
         if (err.message === 'NO_API_KEY_CONFIGURED') {
           setIsApiKeyModalOpen(true);
         } else {
+          setExecutionError(err.message || 'Simulation execution failed');
           console.error('Simulation error:', err);
         }
       }
@@ -112,6 +115,26 @@ export function App() {
           />
 
           <main className="content-area">
+            {executionError && (
+              <div style={{
+                margin: '12px 16px',
+                padding: '10px 14px',
+                background: 'rgba(239, 68, 68, 0.1)',
+                border: '1px solid rgba(239, 68, 68, 0.3)',
+                borderRadius: '8px',
+                color: '#f87171',
+                fontSize: '0.82rem',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between'
+              }}>
+                <span>⚠️ {executionError}</span>
+                <button 
+                  onClick={() => setExecutionError(null)}
+                  style={{ background: 'transparent', border: 'none', color: '#f87171', cursor: 'pointer', fontWeight: 'bold' }}
+                >✕</button>
+              </div>
+            )}
             {currentScenario && currentCase && (
               <>
                 <ScenarioViewer 

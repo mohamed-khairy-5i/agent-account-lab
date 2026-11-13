@@ -16,6 +16,7 @@ export const ApiKeyModal: React.FC<ApiKeyModalProps> = ({ isOpen, onClose, onKey
   const [showAdvanced, setShowAdvanced] = useState<boolean>(false);
   const [hasExistingKey, setHasExistingKey] = useState<boolean>(false);
   const [justSaved, setJustSaved] = useState<boolean>(false);
+  const [urlError, setUrlError] = useState<string | null>(null);
 
   useEffect(() => {
     if (isOpen) {
@@ -25,6 +26,7 @@ export const ApiKeyModal: React.FC<ApiKeyModalProps> = ({ isOpen, onClose, onKey
       setBaseURL(storedURL);
       setHasExistingKey(!!storedKey.trim());
       setJustSaved(false);
+      setUrlError(null);
     }
   }, [isOpen]);
 
@@ -43,6 +45,16 @@ export const ApiKeyModal: React.FC<ApiKeyModalProps> = ({ isOpen, onClose, onKey
   const handleSave = () => {
     const trimmedKey = apiKey.trim();
     const trimmedURL = baseURL.trim() || '/api/llm';
+
+    if (trimmedURL && trimmedURL !== '/api/llm') {
+      const isLocalhost = /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?/i.test(trimmedURL);
+      const isHttps = /^https:\/\//i.test(trimmedURL);
+      if (!isLocalhost && !isHttps) {
+        setUrlError('يجب استخدام بروتوكول https:// للمزودات الخارجية لحماية المفتاح المشفر (أو http://localhost)');
+        return;
+      }
+    }
+    setUrlError(null);
 
     if (trimmedKey) {
       localStorage.setItem('APINEX_API_KEY', trimmedKey);
@@ -183,9 +195,17 @@ export const ApiKeyModal: React.FC<ApiKeyModalProps> = ({ isOpen, onClose, onKey
                   className="input-clean font-mono"
                   placeholder="/api/llm"
                   value={baseURL}
-                  onChange={(e) => setBaseURL(e.target.value)}
+                  onChange={(e) => {
+                    setBaseURL(e.target.value);
+                    setUrlError(null);
+                  }}
                   style={{ fontSize: '0.85rem' }}
                 />
+                {urlError && (
+                  <span style={{ fontSize: '0.74rem', color: '#f87171', marginTop: '4px', display: 'block' }}>
+                    ⚠️ {urlError}
+                  </span>
+                )}
                 <span style={{ fontSize: '0.72rem', color: 'var(--text-dim)', marginTop: '4px', display: 'block' }}>
                   {t.api_key_endpoint_hint}
                 </span>

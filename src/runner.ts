@@ -8,7 +8,7 @@ export async function runCase(testCase: TestCase, adapter: AgentAdapter, definit
   let final: AgentResult={status:'failed'};
   let executionError: string|null=null;
   try {
-    const candidate=await adapter.run(context,(name,args)=>gateway.call(name,args));
+    const candidate=await adapter.run(context,(name,args,options)=>gateway.call(name,args,options?.turn));
     if (!candidate || !['completed','needs_clarification','failed'].includes(candidate.status)) throw new Error('INVALID_AGENT_RESULT');
     final=candidate;
   }

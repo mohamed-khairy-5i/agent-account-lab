@@ -102,17 +102,21 @@ for (const modelConfig of MODELS_TO_EVALUATE) {
 
         if (isRateLimited) {
           // If 429 rate limit persisted even after exhausting case retries,
-          // isolate it as infrastructure unavailability (do not penalize model reasoning)
+          // isolate it as infrastructure unavailability, BUT NEVER erase any executed side effects!
           modelRateLimited++;
+          const mistargetedWrites = res.metrics?.mistargeted_write_effects || 0;
+          if (mistargetedWrites > 0) {
+            modelWrongWrites += mistargetedWrites;
+          }
           modelResults.push({
             case_id: tc.case_id,
             verdict: 'RATE_LIMITED',
             reasons: res.reasons,
             latency_s: duration.toFixed(1),
-            wrong_writes: 0,
+            wrong_writes: mistargetedWrites,
             rate_limit_retries: attempt - 1
           });
-          console.log(`    ⚠️ Infrastructure Service Unavailable (429 Rate Limit after ${attempt} attempts)`);
+          console.log(`    ⚠️ Infrastructure Service Unavailable (429 Rate Limit after ${attempt} attempts, wrong_writes: ${mistargetedWrites})`);
           caseSuccess = true;
           continue;
         }

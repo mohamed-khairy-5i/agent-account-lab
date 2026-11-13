@@ -31,8 +31,8 @@ const LEADERBOARD_DATA: LeaderboardEntry[] = [
     id: 'oracle-reference',
     category: 'Ground Truth',
     score: 100,
-    pass: 8,
-    safeStop: 0,
+    pass: 7,
+    safeStop: 1,
     fail: 0,
     total: 8,
     mistargets: 0,
@@ -44,18 +44,48 @@ const LEADERBOARD_DATA: LeaderboardEntry[] = [
     name: 'GLM-5.3 Flash',
     id: 'free/glm-5.3-flash',
     category: 'Frontier LLM',
-    score: 75,
-    pass: 6,
+    score: 88,
+    pass: 7,
     safeStop: 0,
-    fail: 2,
+    fail: 1,
     total: 8,
     mistargets: 0,
-    latency: '15.4s',
+    latency: '13.1s',
     color: '#34d399',
     badge: '🥇'
   },
   {
     rank: '2',
+    name: 'DeepSeek V4.1 Flash',
+    id: 'free/deepseek-v4.1-flash',
+    category: 'Frontier LLM',
+    score: 67,
+    pass: 4,
+    safeStop: 0,
+    fail: 2,
+    total: 6,
+    mistargets: 2,
+    latency: '8.2s',
+    color: '#38bdf8',
+    badge: '🥈'
+  },
+  {
+    rank: '3',
+    name: 'Qwen 3.8 MAX',
+    id: 'free/qwen-3.8-max',
+    category: 'Frontier LLM',
+    score: 67,
+    pass: 4,
+    safeStop: 0,
+    fail: 2,
+    total: 6,
+    mistargets: 2,
+    latency: '9.0s',
+    color: '#a78bfa',
+    badge: '🥉'
+  },
+  {
+    rank: '4',
     name: 'Kimi K3',
     id: 'free/kimi-k3',
     category: 'Frontier LLM',
@@ -66,37 +96,7 @@ const LEADERBOARD_DATA: LeaderboardEntry[] = [
     total: 8,
     mistargets: 2,
     latency: '15.8s',
-    color: '#818cf8',
-    badge: '🥈'
-  },
-  {
-    rank: '3',
-    name: 'DeepSeek V4.1 Flash',
-    id: 'free/deepseek-v4.1-flash',
-    category: 'Frontier LLM',
-    score: 50,
-    pass: 4,
-    safeStop: 0,
-    fail: 4,
-    total: 8,
-    mistargets: 2,
-    latency: '11.1s',
-    color: '#38bdf8',
-    badge: '🥉'
-  },
-  {
-    rank: '4',
-    name: 'Qwen 3.8 MAX',
-    id: 'free/qwen-3.8-max',
-    category: 'Frontier LLM',
-    score: 50,
-    pass: 4,
-    safeStop: 0,
-    fail: 4,
-    total: 8,
-    mistargets: 2,
-    latency: '11.7s',
-    color: '#a78bfa'
+    color: '#818cf8'
   },
   {
     rank: '5',
@@ -507,7 +507,8 @@ export const BatchOverview: React.FC<BatchOverviewProps> = ({ onRunBatch, onBack
 
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '14px', marginTop: '16px' }}>
             {batchData?.agents.map(ag => {
-              const passPct = Math.round((ag.pass / (ag.pass + ag.fail + ag.safe_stop)) * 100);
+              const total = ag.pass + ag.fail + ag.safe_stop;
+              const passPct = total > 0 ? Math.round(((ag.pass + ag.safe_stop) / total) * 100) : 0;
               const label = lang === 'ar' ? ag.labelAr : ag.labelEn;
 
               return (

@@ -39,7 +39,7 @@
 **ما يقدمه الأساس الحالي للمشروع:**
 - **١٠٠ حالة اختبار** مبنية من ٢٠ سيناريو أساسي و٥ نسخ تعكس الترتيب، وتقلب الحساب الافتراضي، وتحقن حسابات تمويه (Decoys).
 - **محرك تقييم حتمي** يطبق ١٢ قاعدة صارمة للتفريق بين محاولة الخطأ والأثر الفعلي المكتوب.
-- **تأسيس نظيف ومحلي 100%**: مبني بـ TypeScript وNode.js 24، مع تدقيق أنواع صارم واختبارات مؤتمتة بالكامل (52 اختبار ناجح).
+- **تأسيس نظيف ومحلي 100%**: مبني بـ TypeScript وNode.js 24، مع تدقيق أنواع صارم واختبارات مؤتمتة بالكامل (61 اختبار ناجح).
 - **شفافية مطلقة**: لا ندّعي نتائج أداء لنماذج حقيقية حتى الآن؛ النتائج الحالية تعتمد على مرجع يعرف الإجابة لفحص دقة المختبر نفسه وضوابط سلبية مبرمجة.
 
 الخطوات القادمة تشمل بناء واجهة تفاعلية محلية (React/Vite) وتوصيل نموذج لغوي واحد تحت قيود ميزانية صارمة.
@@ -61,7 +61,7 @@ https://github.com/mohamed-khairy-5i/agent-account-lab
 > Current runnable foundation:
 > ▫️ 20 base scenarios expanding to 100 cases across 5 permutations (order reversal, default flips, decoys).
 > ▫️ 6 in-memory mock tools + deterministic evaluator.
-> ▫️ Strict TypeScript, Node 24+, 52 passing tests, 0 real model calls yet.
+> ▫️ Strict TypeScript, Node 24+, 61 passing tests, reproducible frontier benchmark.
 > 
 > Repo: https://github.com/mohamed-khairy-5i/agent-account-lab
 
@@ -82,10 +82,10 @@ A position-biased or naive agent calls `rename_file` on the personal account.
 - Traditional RBAC checkers say `PASS`.
 - But the user's personal file was modified instead of work.
 
-**What is implemented today (v0.1.0-foundation):**
+**What is implemented today:**
 - **100 generated cases** from 20 base scenarios exploring order reversal, flipped defaults, decoy accounts, and folder-name vs. account confusion.
 - **In-memory mock tools & deterministic evaluator**: Isolates run state, enforces explicit account parameters, and separates attempted mistakes from actual executed side effects.
-- **Strict TypeScript & Node 24+**: Zero external runtime dependencies, 52 automated tests, CI configured.
+- **Strict TypeScript & Node 24+**: Zero external runtime dependencies, 61 automated tests, CI configured.
 - **Disclosed baseline**: 0 real model calls yet. Evaluated against an oracle reference (for harness verification) and weak position-biased negative controls.
 
 Next steps: interactive local React UI and a single sandboxed LLM adapter with strict token/budget ceilings.

@@ -41,14 +41,14 @@ npm run validate
 # 2. Run static TypeScript typecheck
 npm run typecheck
 
-# 3. Execute all 52 core functional tests
+# 3. Execute all 61 automated tests (core suite + adapter edge cases)
 npm test
 
 # 4. Verify simulation demo and report generation
 npm run demo
 ```
 
-All 52 tests and type checks must pass with zero errors.
+All 61 tests and type checks must pass with zero errors.
 
 ---
 
@@ -56,10 +56,10 @@ All 52 tests and type checks must pass with zero errors.
 
 - **Permissions ≠ Intent**: Never turn the tool gateway into an oracle gate that blocks wrong-account calls upfront. The mock tool must accept technically valid operations so the evaluator can observe and measure mistargeted actions.
 - **Honest Benchmarking**: Scripted controls (`oracle-reference`, `first_account`, `default_account`) must never be represented as real LLM performance. The oracle deliberately knows expected answers to verify harness consistency.
-- **Privacy & Boundaries**: Keep test data synthetic. Do not commit personal owner guides, private logs, or API keys.
+- **Privacy & Boundaries**: Keep test data synthetic. Do not commit personal owner guides, private logs, or API keys. See our [Security Policy](SECURITY.md).
 
 ---
 
 ## Code of Conduct & Questions
 
-Open an issue using our [GitHub Issue Templates](.github/ISSUE_TEMPLATE/) or discuss scenario design via pull requests.
+This project adheres to the Contributor Covenant [Code of Conduct](CODE_OF_CONDUCT.md). By participating, you are expected to uphold this code. Open an issue using our [GitHub Issue Templates](.github/ISSUE_TEMPLATE/) or discuss scenario design via pull requests.

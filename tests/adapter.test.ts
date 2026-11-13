@@ -397,3 +397,86 @@ test('Benchmark generator dynamically reorders leaderboard, medals, and footnote
   assert(tableEn.includes('🥈 | **DeepSeek V4.1 Flash**'), 'DeepSeek should have silver medal in table');
   assert(tableEn.includes('🥉 | **GLM-5.3 Flash**'), 'GLM should have bronze medal in table');
 });
+
+test('Adapter rejects premature write mutation in the same response turn as ask_user', async () => {
+  const scenarios = loadScenarios();
+  const tools = loadTools();
+  const baseScenario = scenarios.find(s => s.id === 'S01')!;
+  const testCase: any = {
+    case_id: 'S01__premature_write_test',
+    variant: 'base',
+    scenario: structuredClone(baseScenario)
+  };
+
+  let turn = 0;
+  const server = createServer((req, res) => {
+    turn++;
+    res.writeHead(200, { 'Content-Type': 'application/json' });
+
+    if (turn === 1) {
+      // Model attempts to ask clarification AND mutate in the exact same response turn
+      res.end(JSON.stringify({
+        choices: [{
+          message: {
+            role: 'assistant',
+            tool_calls: [
+              {
+                id: 'call_ask_1',
+                type: 'function',
+                function: {
+                  name: 'ask_user',
+                  arguments: JSON.stringify({
+                    question: 'هل تقصد حساب الشغل ولا الحساب الشخصي؟'
+                  })
+                }
+              },
+              {
+                id: 'call_rename_1',
+                type: 'function',
+                function: {
+                  name: 'rename_file',
+                  arguments: JSON.stringify({
+                    account_id: 'acc_work',
+                    file_id: 'work_invoice',
+                    new_name: 'reviewed-invoice.pdf'
+                  })
+                }
+              }
+            ]
+          }
+        }]
+      }));
+    } else {
+      res.end(JSON.stringify({
+        choices: [{
+          message: {
+            role: 'assistant',
+            content: 'سألتك أولاً قبل التعديل.'
+          }
+        }]
+      }));
+    }
+  });
+
+  await new Promise<void>(resolve => server.listen(0, '127.0.0.1', () => resolve()));
+  const port = (server.address() as any).port;
+  const baseURL = `http://127.0.0.1:${port}`;
+
+  try {
+    const adapter = makeOpenAICompatibleAdapter({
+      name: 'Premature Batch Test Agent',
+      apiKey: 'test-key',
+      baseURL,
+      model: 'test-model'
+    });
+
+    const result = await runCase(testCase, adapter, tools, 12);
+    // The premature write mutation in turn 1 must be blocked
+    const mutations = result.trace.filter(e => e.tool === 'rename_file');
+    assert.equal(mutations.length, 0, 'Mutating tool call must NOT be executed in the same turn as ask_user');
+    assert.equal(result.verdict, 'FAIL', 'Premature write attempt without waiting for clarification must fail');
+    assert(result.reasons.includes('clarification_missing_or_late') || result.reasons.includes('intended_write_not_observed'), 'Must flag clarification violation or unobserved intended write');
+  } finally {
+    server.close();
+  }
+});

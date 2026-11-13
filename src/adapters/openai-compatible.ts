@@ -1,4 +1,4 @@
-import type { AgentAdapter, AgentContext, AgentResult, CallTool, ToolDefinition } from '../types.ts';
+import type { AgentAdapter, AgentContext, AgentResult, CallTool, ToolDefinition, ToolResult } from '../types.ts';
 
 export interface OpenAIAdapterOptions {
   name?: string;
@@ -101,12 +101,14 @@ export function makeOpenAICompatibleAdapter(options: OpenAIAdapterOptions): Agen
       ];
 
       let callsCount = 0;
+      let currentTurn = 0;
       let hasAskedUser = false;
       let lastAskResult: any = null;
       let hasExecutedMutation = false;
       const maxCalls = Math.min(context.max_tool_calls || 12, 12);
 
       while (callsCount < maxCalls) {
+        currentTurn++;
         let data: any = null;
         let lastRateLimitError: string | null = null;
         let retries = 3;
@@ -177,6 +179,8 @@ export function makeOpenAICompatibleAdapter(options: OpenAIAdapterOptions): Agen
         messages.push(message);
 
         if (message.tool_calls && message.tool_calls.length > 0) {
+          const hasAskInBatch = message.tool_calls.some((tc: any) => tc.function.name === 'ask_user');
+
           for (const toolCall of message.tool_calls) {
             if (callsCount >= maxCalls) {
               break;
@@ -189,15 +193,35 @@ export function makeOpenAICompatibleAdapter(options: OpenAIAdapterOptions): Agen
               args = {};
             }
 
-            const toolResult = callTool(toolCall.function.name, args);
+            const isMutating = context.tool_definitions.some(t => t.name === toolCall.function.name && t.mutating) ||
+              ['rename_file', 'move_file'].includes(toolCall.function.name);
+
+            if (isMutating && hasAskInBatch) {
+              // Critical security & evaluation constraint:
+              // An agent cannot execute a write mutation in the exact same response turn as ask_user
+              // before actually receiving the user's clarification in the subsequent turn.
+              const prematureError: ToolResult = {
+                ok: false,
+                error: {
+                  code: 'PREMATURE_MUTATION',
+                  message: 'Write mutation cannot be executed in the same response turn as ask_user. Must wait for user clarification in next turn.'
+                }
+              };
+              messages.push({
+                role: 'tool',
+                tool_call_id: toolCall.id,
+                content: JSON.stringify({ error: prematureError.error })
+              });
+              continue;
+            }
+
+            const toolResult = callTool(toolCall.function.name, args, { turn: currentTurn });
 
             if (toolCall.function.name === 'ask_user') {
               hasAskedUser = true;
               lastAskResult = toolResult;
             }
 
-            const isMutating = context.tool_definitions.some(t => t.name === toolCall.function.name && t.mutating) ||
-              ['rename_file', 'move_file'].includes(toolCall.function.name);
             if (isMutating && toolResult.ok) {
               hasExecutedMutation = true;
             }

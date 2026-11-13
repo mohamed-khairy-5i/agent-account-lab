@@ -7,8 +7,8 @@ export interface Scenario { id: string; title_ar: string; category: string; lang
 export interface TestCase { case_id: string; variant: string; scenario: Scenario }
 export interface ToolDefinition { name: string; description_ar: string; mutating: boolean; input_schema: Record<string, any> }
 export interface ToolResult { ok: boolean; data?: any; error?: {code: string; message: string} }
-export interface TraceEvent { step: number; tool: string; args: Record<string, any>; result: ToolResult }
+export interface TraceEvent { step: number; tool: string; args: Record<string, any>; result: ToolResult; turn?: number }
 export interface AgentContext { case_id: string; messages: {role: string; content: string}[]; tool_definitions: ToolDefinition[]; max_tool_calls: number }
 export interface AgentResult { status: 'completed'|'needs_clarification'|'failed'; answer?: string }
-export type CallTool = (name: string, args: Record<string, any>) => ToolResult;
+export type CallTool = (name: string, args: Record<string, any>, options?: { turn?: number }) => ToolResult;
 export interface AgentAdapter { name: string; kind: 'oracle_reference'|'deterministic_negative_control'|'under_test'; run(context: AgentContext, callTool: CallTool): Promise<AgentResult> }

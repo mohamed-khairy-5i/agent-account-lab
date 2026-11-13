@@ -7,9 +7,11 @@
 <p align="center">
   <a href=".github/workflows/ci.yml"><img src="https://img.shields.io/badge/CI-Passing-10b981?style=flat-square&logo=github-actions" alt="CI Status" /></a>
   <a href="tsconfig.json"><img src="https://img.shields.io/badge/TypeScript-Strict_5.9-3178c6?style=flat-square&logo=typescript" alt="TypeScript Strict" /></a>
-  <a href="tests"><img src="https://img.shields.io/badge/Tests-52%2F52_Passing-10b981?style=flat-square" alt="Tests 52/52 Passing" /></a>
+  <a href="tests"><img src="https://img.shields.io/badge/Tests-61%2F61_Passing-10b981?style=flat-square" alt="Tests 61/61 Passing" /></a>
   <a href="docs/RESEARCH_REPORT.md"><img src="https://img.shields.io/badge/Frontier_Benchmark-8_Agents-818cf8?style=flat-square" alt="Frontier Benchmark" /></a>
   <a href="package.json"><img src="https://img.shields.io/badge/Node.js-%3E%3D20.0.0-339933?style=flat-square&logo=node.js" alt="Node Version" /></a>
+  <a href="SECURITY.md"><img src="https://img.shields.io/badge/Security-Policy-blue.svg?style=flat-square" alt="Security Policy" /></a>
+  <a href="CODE_OF_CONDUCT.md"><img src="https://img.shields.io/badge/Contributor_Covenant-v2.1-4baaaa.svg?style=flat-square" alt="Code of Conduct" /></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-yellow.svg?style=flat-square" alt="License MIT" /></a>
   <a href="CONTRIBUTING.md"><img src="https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat-square" alt="PRs Welcome" /></a>
 </p>
@@ -103,7 +105,64 @@ A naive or position-biased agent calls the tool on the **personal** account:
 - **Automated CI workflow** (`.github/workflows/ci.yml`).
 - **Production-ready real LLM adapters** supporting OpenAI-compatible endpoints with automated rate-limiting & backoff.
 - **Local interactive React 19 + Vite Web UI** with full Arabic RTL support, dark theme, and trace visualization.
-- **52 passing automated core tests** with zero external runtime dependencies.
+- **61 passing automated core and adapter regression tests** with zero external runtime dependencies.
+
+---
+
+## System Architecture
+
+```mermaid
+flowchart TD
+    subgraph Input["📥 Input Layer"]
+        U["User Instruction<br><i>(Prompt with Multi-Account Context)</i>"]
+        S["Synthetic World State<br><i>(Personal & Work Accounts, Duplicate Files)</i>"]
+    end
+
+    subgraph Agent["🤖 Agent Under Test"]
+        LLM["AI Agent / Model<br><i>(GLM-5.3, DeepSeek, Qwen, Kimi, Gemini)</i>"]
+    end
+
+    subgraph Gateway["🛡️ In-Memory Mock Tool Gateway"]
+        direction TB
+        T1["list_accounts()"]
+        T2["list_files(account_id)"]
+        T3["read_file(account_id, file_id)"]
+        T4["rename_file(account_id, file_id, new_name)"]
+        T5["move_file(account_id, file_id, target_folder)"]
+        T6["ask_user(question)"]
+    end
+
+    subgraph Engine["⚖️ Deterministic Evaluation Engine (12 Rules)"]
+        TR["Execution Trace Recorder<br><i>(Attempts vs. Executed Effects)</i>"]
+        EV["Multi-Factor Evaluator"]
+        OR["Oracle Ground Truth<br><i>(Target Account & Intended Mutation)</i>"]
+    end
+
+    subgraph Verdict["📊 Verdict & Telemetry"]
+        P["✅ PASS<br><i>Intended account mutated</i>"]
+        ST["⚠️ SAFE_STOP<br><i>Clarification requested safely</i>"]
+        F["❌ FAIL<br><i>Mistargeted write or position bias</i>"]
+    end
+
+    U --> LLM
+    S --> Gateway
+    LLM -->|"Tool Calls"| Gateway
+    Gateway --> TR
+    TR --> EV
+    OR --> EV
+    EV --> P
+    EV --> ST
+    EV --> F
+
+    classDef pass fill:#064e3b,stroke:#10b981,stroke-width:2px,color:#ecfdf5;
+    classDef safe fill:#78350f,stroke:#f59e0b,stroke-width:2px,color:#fffbeb;
+    classDef fail fill:#7f1d1d,stroke:#ef4444,stroke-width:2px,color:#fef2f2;
+    classDef core fill:#1e1e2e,stroke:#6366f1,stroke-width:2px,color:#e0e7ff;
+    class P pass;
+    class ST safe;
+    class F fail;
+    class LLM,EV,TR core;
+```
 
 ---
 
@@ -200,6 +259,8 @@ Running `npm run demo` evaluates 100 generated cases against three reference/con
 ## Documentation
 - [Arabic Project Guide / الدليل العربي](README_AR.md)
 - [Contributing Guidelines](CONTRIBUTING.md) ([بالعربية](docs/CONTRIBUTING_AR.md))
+- [Security Policy](SECURITY.md)
+- [Code of Conduct](CODE_OF_CONDUCT.md)
 - [Scenario Catalog](docs/SCENARIOS_AR.md)
 - [Tools and Roles](docs/TOOLS_AND_ROLES_AR.md)
 - [Evaluation Rules](docs/EVALUATION_RULES_AR.md)
