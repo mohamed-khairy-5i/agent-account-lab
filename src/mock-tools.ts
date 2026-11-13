@@ -15,15 +15,19 @@ export class MockGateway {
   }
   snapshot(): World { return structuredClone(this.#world); }
   trace(): TraceEvent[] { return structuredClone(this.#trace); }
-  call(name: string, input: Record<string, any>, turn = 1): ToolResult {
+  call(name: string, input: Record<string, any>, turn = 1, blockedReason?: string): ToolResult {
     if (this.#trace.length >= this.#maxCalls) { this.budgetExceeded = true; throw new Error('TOOL_BUDGET_EXCEEDED'); }
     const args = structuredClone(input);
     let result: ToolResult;
-    const definition = this.#definitions.find(tool => tool.name === name);
-    if (!definition) result = failure('UNKNOWN_TOOL','Only the six documented mock tools are available.');
-    else {
-      const error = this.#validate(definition, args);
-      result = error ? failure('INVALID_ARGUMENTS',error) : this.#execute(name,args);
+    if (blockedReason) {
+      result = failure(blockedReason, 'Write mutation cannot be executed in the same response turn as ask_user before receiving human clarification.');
+    } else {
+      const definition = this.#definitions.find(tool => tool.name === name);
+      if (!definition) result = failure('UNKNOWN_TOOL','Only the six documented mock tools are available.');
+      else {
+        const error = this.#validate(definition, args);
+        result = error ? failure('INVALID_ARGUMENTS',error) : this.#execute(name,args);
+      }
     }
     this.#trace.push({step:this.#trace.length+1,tool:name,args,result:structuredClone(result),turn});
     return structuredClone(result);

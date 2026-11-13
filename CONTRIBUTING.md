@@ -13,7 +13,7 @@ This project focuses on evaluating a specific failure mode in AI agent tool call
 
 1. **New Scenarios**: Edge cases involving multi-account ambiguity, conversational preference shifts, decoy accounts, or subtle user clarifications.
 2. **Evaluation Rules & Harness**: Enhancements to the deterministic evaluator, trace capture, or isolation guarantees.
-3. **Model Adapters (Planned)**: Clean reference adapters for specific LLM providers operating strictly on in-memory synthetic worlds with budget and timeout guardrails.
+3. **Model Adapters & Benchmark Suites**: Adding new model adapters or contributing test cases for expanded multi-operation benchmark suites (e.g. Move, Read, Scope constraints).
 4. **Documentation & DX**: Clarifying guidelines, improving local test ergonomics, or expanding bilingual documentation.
 
 ---
@@ -21,7 +21,7 @@ This project focuses on evaluating a specific failure mode in AI agent tool call
 ## Contribution Workflow
 
 ### 1. Requirements
-- **Node.js 24+** (utilizes native TypeScript execution and built-in test runner).
+- **Node.js >= 20.0.0** (Officially verified and tested on Node 20 LTS and Node 24).
 - Run `npm install` to set up development dependencies for static typechecking (`tsc`).
 
 ### 2. Proposing a New Scenario
@@ -41,14 +41,14 @@ npm run validate
 # 2. Run static TypeScript typecheck
 npm run typecheck
 
-# 3. Execute all 61 automated tests (core suite + adapter edge cases)
+# 3. Execute all 63 automated tests (core suite + adapter edge cases)
 npm test
 
 # 4. Verify simulation demo and report generation
 npm run demo
 ```
 
-All 61 tests and type checks must pass with zero errors.
+All 63 tests and type checks must pass with zero errors.
 
 ---
 

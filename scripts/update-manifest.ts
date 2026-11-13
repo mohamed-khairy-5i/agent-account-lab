@@ -1,55 +1,28 @@
-import { readFileSync, writeFileSync, existsSync } from 'node:fs';
-import { createHash } from 'node:crypto';
+import { writeFileSync, existsSync } from 'node:fs';
 import { resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { computeHash, getTrackedFiles } from './verify-manifest.ts';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const rootDir = resolve(__dirname, '..');
 const manifestPath = resolve(rootDir, 'MANIFEST.sha256');
 
-function computeHash(filePath: string): string {
-  const isBinary = /\.(gz|png|jpg|jpeg|ico|gif|webp)$/i.test(filePath);
-  const fileBuffer = readFileSync(filePath);
-  if (isBinary) {
-    return createHash('sha256').update(fileBuffer).digest('hex');
-  }
-  // Standardize text files to LF line-endings matching git repo & Linux CI checkouts
-  const normalized = fileBuffer.toString('utf8').replace(/\r\n/g, '\n');
-  return createHash('sha256').update(Buffer.from(normalized, 'utf8')).digest('hex');
-}
+const trackedFiles = getTrackedFiles(rootDir);
+trackedFiles.sort();
 
-if (!existsSync(manifestPath)) {
-  console.error(`❌ MANIFEST.sha256 not found at: ${manifestPath}`);
-  process.exit(1);
-}
+const lines: string[] = [];
+let count = 0;
 
-const lines = readFileSync(manifestPath, 'utf8')
-  .split('\n')
-  .filter(l => l.trim().length > 0);
-
-const updatedLines: string[] = [];
-let updatedCount = 0;
-
-for (const line of lines) {
-  const parts = line.trim().split(/\s+/);
-  if (parts.length < 2) continue;
-  const originalHash = parts[0];
-  const relativePath = parts.slice(1).join(' ');
-  const absolutePath = resolve(rootDir, relativePath);
-
-  if (!existsSync(absolutePath)) {
-    console.warn(`⚠️ File not found, skipping: ${relativePath}`);
-    updatedLines.push(line);
+for (const relPath of trackedFiles) {
+  const absPath = resolve(rootDir, relPath);
+  if (!existsSync(absPath)) {
+    console.warn(`⚠️ Tracked file not found on disk, skipping: ${relPath}`);
     continue;
   }
-
-  const currentHash = computeHash(absolutePath);
-  if (currentHash !== originalHash) {
-    updatedCount++;
-    console.log(`🔄 Updated: ${relativePath}`);
-  }
-  updatedLines.push(`${currentHash}  ${relativePath}`);
+  const hash = computeHash(absPath);
+  lines.push(`${hash}  ${relPath}`);
+  count++;
 }
 
-writeFileSync(manifestPath, updatedLines.join('\n') + '\n', 'utf8');
-console.log(`✅ MANIFEST.sha256 successfully updated (${updatedCount} files updated, ${updatedLines.length} total).`);
+writeFileSync(manifestPath, lines.join('\n') + '\n', 'utf8');
+console.log(`✅ MANIFEST.sha256 successfully generated with ${count} tracked files.`);

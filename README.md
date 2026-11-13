@@ -7,7 +7,7 @@
 <p align="center">
   <a href=".github/workflows/ci.yml"><img src="https://img.shields.io/badge/CI-Passing-10b981?style=flat-square&logo=github-actions" alt="CI Status" /></a>
   <a href="tsconfig.json"><img src="https://img.shields.io/badge/TypeScript-Strict_5.9-3178c6?style=flat-square&logo=typescript" alt="TypeScript Strict" /></a>
-  <a href="tests"><img src="https://img.shields.io/badge/Tests-61%2F61_Passing-10b981?style=flat-square" alt="Tests 61/61 Passing" /></a>
+  <a href="tests"><img src="https://img.shields.io/badge/Tests-63%2F63_Passing-10b981?style=flat-square" alt="Tests 63/63 Passing" /></a>
   <a href="docs/RESEARCH_REPORT.md"><img src="https://img.shields.io/badge/Frontier_Benchmark-8_Agents-818cf8?style=flat-square" alt="Frontier Benchmark" /></a>
   <a href="package.json"><img src="https://img.shields.io/badge/Node.js-%3E%3D20.0.0-339933?style=flat-square&logo=node.js" alt="Node Version" /></a>
   <a href="SECURITY.md"><img src="https://img.shields.io/badge/Security-Policy-blue.svg?style=flat-square" alt="Security Policy" /></a>

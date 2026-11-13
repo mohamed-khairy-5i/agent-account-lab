@@ -7,7 +7,7 @@
 <p align="center">
   <a href=".github/workflows/ci.yml"><img src="https://img.shields.io/badge/CI-ناجح-10b981?style=flat-square&logo=github-actions" alt="CI Status" /></a>
   <a href="tsconfig.json"><img src="https://img.shields.io/badge/TypeScript-Strict_5.9-3178c6?style=flat-square&logo=typescript" alt="TypeScript Strict" /></a>
-  <a href="tests"><img src="https://img.shields.io/badge/الاختبارات-61%2F61_ناجحة-10b981?style=flat-square" alt="Tests 61/61 Passing" /></a>
+  <a href="tests"><img src="https://img.shields.io/badge/الاختبارات-63%2F63_ناجحة-10b981?style=flat-square" alt="Tests 63/63 Passing" /></a>
   <a href="docs/RESEARCH_REPORT.md"><img src="https://img.shields.io/badge/تقييم_النماذج-8_وكلاء-818cf8?style=flat-square" alt="Frontier Benchmark" /></a>
   <a href="package.json"><img src="https://img.shields.io/badge/Node.js-%3E%3D20.0.0-339933?style=flat-square&logo=node.js" alt="Node Version" /></a>
   <a href="SECURITY.md"><img src="https://img.shields.io/badge/سياسة_الأمان-معتمدة-blue.svg?style=flat-square" alt="Security Policy" /></a>
@@ -102,7 +102,7 @@
 - **أتمتة الفحص والتكامل المستمر (CI)** عبر GitHub Actions في `.github/workflows/ci.yml`.
 - **موصلات نماذج ذكية حقيقية** متوافقة مع واجهات OpenAI API وتدعم إعادة المحاولة التلقائية ومقاومة قيود الاستدعاء (Rate Limits).
 - **واجهة ويب تفاعلية محلية (React 19 + Vite)** بتصميم داكن احترافي، ودعم كامل للغة العربية (RTL)، ومولد مقارنة التعديلات.
-- **٦١ اختبارًا وظيفيًا مؤتمتًا تمر جميعها بنجاح (٦١ نجاح، صفر فشل)** بدون أي حزم تشغيل خارجية.
+- **٦٣ اختبارًا وظيفيًا مؤتمتًا تمر جميعها بنجاح (٦٣ نجاح، صفر فشل)** بدون أي حزم تشغيل خارجية.
 
 ---
 

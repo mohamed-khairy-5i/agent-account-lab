@@ -44,6 +44,7 @@ export function App() {
   const runSimulation = async (targetCase = currentCase, agent = selectedAgent) => {
     const runId = ++runIdRef.current;
     setIsRunning(true);
+    setResult(null); // Clear previous result immediately so stale trace/diff is never shown during new run
     setExecutionError(null);
     try {
       const res = await harness.runSingle(targetCase, agent);
@@ -52,6 +53,7 @@ export function App() {
       }
     } catch (err: any) {
       if (runIdRef.current === runId) {
+        setResult(null); // Ensure failed execution leaves no stale trace
         if (err.message === 'NO_API_KEY_CONFIGURED') {
           setIsApiKeyModalOpen(true);
         } else {

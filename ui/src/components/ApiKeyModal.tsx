@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { KeyIcon, LockIcon, EyeIcon, EyeOffIcon, CheckCircleIcon } from './Icons.tsx';
 import { useLanguage } from '../i18n.tsx';
+import { validateCustomEndpoint } from '../../../src/validate-endpoint.ts';
 
 interface ApiKeyModalProps {
   isOpen: boolean;
@@ -46,13 +47,10 @@ export const ApiKeyModal: React.FC<ApiKeyModalProps> = ({ isOpen, onClose, onKey
     const trimmedKey = apiKey.trim();
     const trimmedURL = baseURL.trim() || '/api/llm';
 
-    if (trimmedURL && trimmedURL !== '/api/llm') {
-      const isLocalhost = /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?/i.test(trimmedURL);
-      const isHttps = /^https:\/\//i.test(trimmedURL);
-      if (!isLocalhost && !isHttps) {
-        setUrlError('يجب استخدام بروتوكول https:// للمزودات الخارجية لحماية المفتاح المشفر (أو http://localhost)');
-        return;
-      }
+    const validation = validateCustomEndpoint(trimmedURL);
+    if (!validation.valid) {
+      setUrlError(validation.error || 'عنوان URL غير صالح');
+      return;
     }
     setUrlError(null);
 

@@ -82,6 +82,7 @@ for (const modelConfig of MODELS_TO_EVALUATE) {
     let caseSuccess = false;
     let attempt = 0;
     const maxCaseRetries = 3;
+    let accumulatedWrongWrites = 0;
 
     while (!caseSuccess && attempt < maxCaseRetries) {
       attempt++;
@@ -90,10 +91,13 @@ for (const modelConfig of MODELS_TO_EVALUATE) {
         const res = await runCase(tc, adapter, tools, rules.max_tool_calls || 12);
         const duration = ((Date.now() - startTime) / 1000);
 
+        const currentAttemptWrongWrites = res.metrics?.mistargeted_write_effects || 0;
+        accumulatedWrongWrites = Math.max(accumulatedWrongWrites, currentAttemptWrongWrites);
+
         // Check if the run failed due to 429 rate limit
         const isRateLimited = res.reasons.some(r => r.includes('429') || r.includes('Rate limit') || r.includes('RATE_LIMIT'));
         if (isRateLimited && attempt < maxCaseRetries) {
-          console.log(`    ⚠️ Transient 429 rate limit hit on attempt ${attempt}. Backing off for 7s...`);
+          console.log(`    ⚠️ Transient 429 rate limit hit on attempt ${attempt} (accumulated side effects: ${accumulatedWrongWrites}). Backing off for 7s...`);
           await new Promise(r => setTimeout(r, 7000));
           continue;
         }
@@ -104,19 +108,19 @@ for (const modelConfig of MODELS_TO_EVALUATE) {
           // If 429 rate limit persisted even after exhausting case retries,
           // isolate it as infrastructure unavailability, BUT NEVER erase any executed side effects!
           modelRateLimited++;
-          const mistargetedWrites = res.metrics?.mistargeted_write_effects || 0;
-          if (mistargetedWrites > 0) {
-            modelWrongWrites += mistargetedWrites;
+          const finalWrongWrites = Math.max(accumulatedWrongWrites, res.metrics?.mistargeted_write_effects || 0);
+          if (finalWrongWrites > 0) {
+            modelWrongWrites += finalWrongWrites;
           }
           modelResults.push({
             case_id: tc.case_id,
             verdict: 'RATE_LIMITED',
             reasons: res.reasons,
             latency_s: duration.toFixed(1),
-            wrong_writes: mistargetedWrites,
+            wrong_writes: finalWrongWrites,
             rate_limit_retries: attempt - 1
           });
-          console.log(`    ⚠️ Infrastructure Service Unavailable (429 Rate Limit after ${attempt} attempts, wrong_writes: ${mistargetedWrites})`);
+          console.log(`    ⚠️ Infrastructure Service Unavailable (429 Rate Limit after ${attempt} attempts, wrong_writes: ${finalWrongWrites})`);
           caseSuccess = true;
           continue;
         }
@@ -125,8 +129,9 @@ for (const modelConfig of MODELS_TO_EVALUATE) {
         else if (res.verdict === 'SAFE_STOP') modelSafeStop++;
         else modelFail++;
 
-        if (res.metrics.mistargeted_write_effects > 0) {
-          modelWrongWrites += res.metrics.mistargeted_write_effects;
+        const finalWrongWrites = Math.max(accumulatedWrongWrites, res.metrics?.mistargeted_write_effects || 0);
+        if (finalWrongWrites > 0) {
+          modelWrongWrites += finalWrongWrites;
         }
 
         modelResults.push({
@@ -134,12 +139,12 @@ for (const modelConfig of MODELS_TO_EVALUATE) {
           verdict: res.verdict,
           reasons: res.reasons,
           latency_s: duration.toFixed(1),
-          wrong_writes: res.metrics.mistargeted_write_effects,
+          wrong_writes: finalWrongWrites,
           rate_limit_retries: attempt - 1
         });
 
         const icon = res.verdict === 'PASS' ? '✅' : (res.verdict === 'SAFE_STOP' ? '⏸️' : '❌');
-        console.log(`    Result: ${icon} ${res.verdict} (${duration.toFixed(1)}s)`);
+        console.log(`    Result: ${icon} ${res.verdict} (${duration.toFixed(1)}s, wrong_writes: ${finalWrongWrites})`);
         if (res.reasons.length > 0) console.log(`    Reasons: ${JSON.stringify(res.reasons)}`);
         caseSuccess = true;
       } catch (err: any) {
@@ -151,28 +156,35 @@ for (const modelConfig of MODELS_TO_EVALUATE) {
         }
 
         if (isRateLimit) {
-          // Isolate 429 infrastructure exhaustion from model behavioral evaluation
+          // Isolate 429 infrastructure exhaustion from model behavioral evaluation,
+          // while preserving any side effects recorded across previous attempts!
           modelRateLimited++;
+          if (accumulatedWrongWrites > 0) {
+            modelWrongWrites += accumulatedWrongWrites;
+          }
           modelResults.push({
             case_id: tc.case_id,
             verdict: 'RATE_LIMITED',
             reasons: [`infrastructure_rate_limited:${err.message}`],
             latency_s: '0',
-            wrong_writes: 0,
+            wrong_writes: accumulatedWrongWrites,
             rate_limit_retries: attempt - 1
           });
-          console.log(`    ⚠️ Infrastructure Rate Limit Exceeded (isolated from model score): ${err.message}`);
+          console.log(`    ⚠️ Infrastructure Rate Limit Exceeded (isolated from model score): ${err.message} (wrong_writes: ${accumulatedWrongWrites})`);
           caseSuccess = true;
           continue;
         }
 
         modelFail++;
+        if (accumulatedWrongWrites > 0) {
+          modelWrongWrites += accumulatedWrongWrites;
+        }
         modelResults.push({
           case_id: tc.case_id,
           verdict: 'FAIL',
           reasons: [`execution_error:${err.message}`],
           latency_s: '0',
-          wrong_writes: 0,
+          wrong_writes: accumulatedWrongWrites,
           rate_limit_retries: attempt - 1
         });
         console.log(`    Error: ${err.message}`);

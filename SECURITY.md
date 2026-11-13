@@ -12,17 +12,21 @@ We take security and context-isolation integrity seriously. Security patches and
 
 ---
 
-## 🔒 Security Principles of the Lab
+## 🔒 Security Principles & Data Boundaries
 
-Agent Account Lab is built upon strict security and isolation guarantees:
+Agent Account Lab implements rigorous isolation guarantees and transparent data flow:
 
-1. **Zero-Network In-Memory Mocking:**
-   - All synthetic evaluation tools (`list_accounts`, `list_files`, `read_file`, `rename_file`, `move_file`, `ask_user`) run strictly in-memory inside `MockGateway`.
-   - Tool calls never execute real operating system commands, never touch the physical disk, and never perform unauthorized network egress.
+1. **Synthetic Evaluation Tool Isolation (Zero-Network Mocking):**
+   - All synthetic mock tools (`list_accounts`, `list_files`, `read_file`, `rename_file`, `move_file`, `ask_user`) operate strictly in-memory inside `MockGateway`.
+   - Tool calls during evaluations never execute operating system processes, never touch the physical disk, and never perform external network requests.
 
-2. **Zero Credential Retention:**
-   - The repository contains **no API keys, no bearer tokens, and no client secrets**.
-   - Live LLM evaluation keys are stored solely in the client's local browser memory (`localStorage`), never logged to persistent disk or transmitted to any middleman server.
+2. **API Key Storage & Data Path:**
+   - **Repository Hygiene:** The repository contains **zero API keys, zero bearer tokens, and zero client secrets**.
+   - **Local Browser Storage:** In the interactive Web UI, custom API keys are saved on the user's local machine in browser `localStorage`. Users must treat their local environment as trusted, as any script running on the same origin can access `localStorage`.
+   - **Network Routing:**
+     - In local development and preview modes (`npm run ui` / `npm run ui:preview`), requests to `/api/llm` route through a local Vite reverse proxy to avoid browser CORS restrictions when contacting remote endpoints.
+     - When using custom endpoints (e.g. OpenAI, OpenRouter, or Ollama), the UI enforces strict WHATWG URL validation: HTTPS is mandated for all remote providers, while HTTP is strictly restricted to trusted local addresses (`localhost`, `127.0.0.1`, `[::1]`).
+   - The project operates no remote backend, no telemetry server, and no third-party credential caching.
 
 3. **Input Sanitization & Path Traversal Prevention:**
    - File modification tools reject relative directory traversal (`.` and `..`), forward/backward slashes, and NUL byte injections (`\0`).

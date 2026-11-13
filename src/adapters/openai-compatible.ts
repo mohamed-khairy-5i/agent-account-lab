@@ -1,4 +1,4 @@
-import type { AgentAdapter, AgentContext, AgentResult, CallTool, ToolDefinition, ToolResult } from '../types.ts';
+import type { AgentAdapter, AgentContext, AgentResult, CallTool, ToolDefinition } from '../types.ts';
 
 export interface OpenAIAdapterOptions {
   name?: string;
@@ -200,17 +200,12 @@ export function makeOpenAICompatibleAdapter(options: OpenAIAdapterOptions): Agen
               // Critical security & evaluation constraint:
               // An agent cannot execute a write mutation in the exact same response turn as ask_user
               // before actually receiving the user's clarification in the subsequent turn.
-              const prematureError: ToolResult = {
-                ok: false,
-                error: {
-                  code: 'PREMATURE_MUTATION',
-                  message: 'Write mutation cannot be executed in the same response turn as ask_user. Must wait for user clarification in next turn.'
-                }
-              };
+              // Record the rejected attempt explicitly in trace via MockGateway!
+              const toolResult = callTool(toolCall.function.name, args, { turn: currentTurn, blockedReason: 'PREMATURE_MUTATION' });
               messages.push({
                 role: 'tool',
                 tool_call_id: toolCall.id,
-                content: JSON.stringify({ error: prematureError.error })
+                content: JSON.stringify({ error: toolResult.error })
               });
               continue;
             }

@@ -2,145 +2,14 @@ import React, { useState } from 'react';
 import type { SimulationResult } from '../engine.ts';
 import { ArrowRightIcon, RefreshIcon, DownloadIcon, LayersIcon, BarChartIcon, TrophyIcon, ShieldIcon } from './Icons.tsx';
 import { useLanguage } from '../i18n.tsx';
+import { getLeaderboardData, BENCHMARK_TIMESTAMP, type LeaderboardEntry } from '../benchmark-data.ts';
 
 interface BatchOverviewProps {
   onRunBatch: (onProgress: (done: number, total: number) => void) => Promise<SimulationResult[]>;
   onBack: () => void;
 }
 
-interface LeaderboardEntry {
-  rank: string;
-  name: string;
-  id: string;
-  category: string;
-  score: number;
-  pass: number;
-  safeStop: number;
-  fail: number;
-  total: number;
-  mistargets: number;
-  latency: string;
-  color: string;
-  badge?: string;
-}
-
-const LEADERBOARD_DATA: LeaderboardEntry[] = [
-  {
-    rank: '—',
-    name: 'Oracle Reference',
-    id: 'oracle-reference',
-    category: 'Ground Truth',
-    score: 100,
-    pass: 7,
-    safeStop: 1,
-    fail: 0,
-    total: 8,
-    mistargets: 0,
-    latency: '<10ms',
-    color: '#10b981'
-  },
-  {
-    rank: '1',
-    name: 'GLM-5.3 Flash',
-    id: 'free/glm-5.3-flash',
-    category: 'Frontier LLM',
-    score: 88,
-    pass: 7,
-    safeStop: 0,
-    fail: 1,
-    total: 8,
-    mistargets: 0,
-    latency: '13.1s',
-    color: '#34d399',
-    badge: '🥇'
-  },
-  {
-    rank: '2',
-    name: 'DeepSeek V4.1 Flash',
-    id: 'free/deepseek-v4.1-flash',
-    category: 'Frontier LLM',
-    score: 67,
-    pass: 4,
-    safeStop: 0,
-    fail: 2,
-    total: 6,
-    mistargets: 2,
-    latency: '8.2s',
-    color: '#38bdf8',
-    badge: '🥈'
-  },
-  {
-    rank: '3',
-    name: 'Qwen 3.8 MAX',
-    id: 'free/qwen-3.8-max',
-    category: 'Frontier LLM',
-    score: 67,
-    pass: 4,
-    safeStop: 0,
-    fail: 2,
-    total: 6,
-    mistargets: 2,
-    latency: '9.0s',
-    color: '#a78bfa',
-    badge: '🥉'
-  },
-  {
-    rank: '4',
-    name: 'Kimi K3',
-    id: 'free/kimi-k3',
-    category: 'Frontier LLM',
-    score: 63,
-    pass: 5,
-    safeStop: 0,
-    fail: 3,
-    total: 8,
-    mistargets: 2,
-    latency: '15.8s',
-    color: '#818cf8'
-  },
-  {
-    rank: '5',
-    name: 'Gemini 3.8 Flash',
-    id: 'free/gemini-3.8-flash',
-    category: 'Frontier LLM',
-    score: 25,
-    pass: 2,
-    safeStop: 0,
-    fail: 6,
-    total: 8,
-    mistargets: 2,
-    latency: '5.2s',
-    color: '#fbbf24'
-  },
-  {
-    rank: '—',
-    name: 'First Account Heuristic',
-    id: 'first_account',
-    category: 'Negative Control',
-    score: 34,
-    pass: 34,
-    safeStop: 0,
-    fail: 66,
-    total: 100,
-    mistargets: 47,
-    latency: '<10ms',
-    color: '#f43f5e'
-  },
-  {
-    rank: '—',
-    name: 'Default Account Heuristic',
-    id: 'default_account',
-    category: 'Negative Control',
-    score: 31,
-    pass: 31,
-    safeStop: 0,
-    fail: 69,
-    total: 100,
-    mistargets: 50,
-    latency: '<10ms',
-    color: '#be123c'
-  }
-];
+const LEADERBOARD_DATA: LeaderboardEntry[] = getLeaderboardData();
 
 export const BatchOverview: React.FC<BatchOverviewProps> = ({ onRunBatch, onBack }) => {
   const { lang, t } = useLanguage();
@@ -353,7 +222,7 @@ export const BatchOverview: React.FC<BatchOverviewProps> = ({ onRunBatch, onBack
                 <h3 style={{ fontSize: '0.98rem', fontWeight: 700 }}>{t.chart_preview_title}</h3>
               </div>
               <span className="pill pill-neutral" style={{ fontSize: '0.72rem' }}>
-                temperature: 0 • standard suite
+                {lang === 'ar' ? 'تشغيل توثيقي معتمد:' : 'Documented Benchmark Run:'} {new Date(BENCHMARK_TIMESTAMP).toLocaleDateString()} • temp 0
               </span>
             </div>
             

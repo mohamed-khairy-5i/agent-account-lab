@@ -10,5 +10,5 @@ export interface ToolResult { ok: boolean; data?: any; error?: {code: string; me
 export interface TraceEvent { step: number; tool: string; args: Record<string, any>; result: ToolResult; turn?: number }
 export interface AgentContext { case_id: string; messages: {role: string; content: string}[]; tool_definitions: ToolDefinition[]; max_tool_calls: number }
 export interface AgentResult { status: 'completed'|'needs_clarification'|'failed'; answer?: string }
-export type CallTool = (name: string, args: Record<string, any>, options?: { turn?: number }) => ToolResult;
+export type CallTool = (name: string, args: Record<string, any>, options?: { turn?: number; blockedReason?: string }) => ToolResult;
 export interface AgentAdapter { name: string; kind: 'oracle_reference'|'deterministic_negative_control'|'under_test'; run(context: AgentContext, callTool: CallTool): Promise<AgentResult> }

@@ -152,7 +152,7 @@ export function syncBenchmark() {
       if (is429) {
         r.verdict = 'RATE_LIMITED';
         r.reasons = ['infrastructure_rate_limited:429'];
-        r.wrong_writes = 0;
+        r.wrong_writes = r.wrong_writes ?? 0;
         r.latency_s = '0';
       }
     }
