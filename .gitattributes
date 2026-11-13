@@ -1,0 +1,9 @@
+# Set default behavior to automatically normalize line endings to LF on commit and checkout
+* text=auto eol=lf
+
+# Explicit binary files
+*.gz binary
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.ico binary

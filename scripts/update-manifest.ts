@@ -8,8 +8,14 @@ const rootDir = resolve(__dirname, '..');
 const manifestPath = resolve(rootDir, 'MANIFEST.sha256');
 
 function computeHash(filePath: string): string {
+  const isBinary = /\.(gz|png|jpg|jpeg|ico|gif|webp)$/i.test(filePath);
   const fileBuffer = readFileSync(filePath);
-  return createHash('sha256').update(fileBuffer).digest('hex');
+  if (isBinary) {
+    return createHash('sha256').update(fileBuffer).digest('hex');
+  }
+  // Standardize text files to LF line-endings matching git repo & Linux CI checkouts
+  const normalized = fileBuffer.toString('utf8').replace(/\r\n/g, '\n');
+  return createHash('sha256').update(Buffer.from(normalized, 'utf8')).digest('hex');
 }
 
 if (!existsSync(manifestPath)) {

@@ -38,23 +38,24 @@
   "scripts": {
     "install:all": "npm install && npm --prefix ui install",
     "ui:install": "npm --prefix ui install",
-    "test": "node --test tests/core.test.ts tests/adapter.test.ts",
-    "test:core": "node --test tests/core.test.ts",
-    "test:adapter": "node --test tests/adapter.test.ts",
+    "test": "node --import tsx --test tests/core.test.ts tests/adapter.test.ts",
+    "test:core": "node --import tsx --test tests/core.test.ts",
+    "test:adapter": "node --import tsx --test tests/adapter.test.ts",
     "typecheck": "tsc --noEmit",
-    "validate": "node scripts/validate.ts",
-    "demo": "node scripts/demo.ts",
-    "check-all": "node scripts/validate.ts && tsc --noEmit && node --test tests/core.test.ts tests/adapter.test.ts",
-    "benchmark:live": "node scripts/benchmark-live.ts",
-    "benchmark:models": "node scripts/multi-model-benchmark.ts",
-    "manifest:update": "node scripts/update-manifest.ts",
-    "manifest:verify": "node scripts/verify-manifest.ts",
+    "validate": "node --import tsx scripts/validate.ts",
+    "demo": "node --import tsx scripts/demo.ts",
+    "check-all": "node --import tsx scripts/validate.ts && tsc --noEmit && node --import tsx --test tests/core.test.ts tests/adapter.test.ts",
+    "benchmark:live": "node --import tsx scripts/benchmark-live.ts",
+    "benchmark:models": "node --import tsx scripts/multi-model-benchmark.ts",
+    "manifest:update": "node --import tsx scripts/update-manifest.ts",
+    "manifest:verify": "node --import tsx scripts/verify-manifest.ts",
     "ui": "npm --prefix ui run dev",
     "ui:build": "npm --prefix ui run build",
     "ui:preview": "npm --prefix ui run preview"
   },
   "devDependencies": {
     "@types/node": "^22.13.10",
+    "tsx": "^4.23.15",
     "typescript": "^5.8.2"
   }
 }
