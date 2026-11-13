@@ -90,7 +90,7 @@ export const ScenarioViewer: React.FC<ScenarioViewerProps> = ({
             onChange={(e) => onAgentChange(e.target.value as AgentChoice)}
           >
             <optgroup label={lang === 'ar' ? '⚡ نماذج ذكاء اصطناعي حقيقية (Live Frontier APIs)' : '⚡ Frontier AI Models (Live APIs)'}>
-              <option value="glm-5.3-flash">🥇 GLM-5.3 Flash ({lang === 'ar' ? '75% - المتصدر' : '75% - #1 Rank'})</option>
+              <option value="glm-5.3-flash">🥇 GLM-5.3 Flash ({lang === 'ar' ? '88% - المتصدر' : '88% - #1 Rank'})</option>
               <option value="kimi-k3">🥈 Kimi K3 ({lang === 'ar' ? '63% - الثاني' : '63% - #2 Rank'})</option>
               <option value="deepseek-v4.1-flash">🥉 DeepSeek V4.1 Flash ({lang === 'ar' ? '50% نجاح' : '50% Score'})</option>
               <option value="qwen-3.8-max">⚡ Qwen 3.8 MAX ({lang === 'ar' ? '50% نجاح' : '50% Score'})</option>

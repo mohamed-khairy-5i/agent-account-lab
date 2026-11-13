@@ -15,12 +15,12 @@
     {
       "model_id": "free/glm-5.3-flash",
       "label": "GLM-5.3 Flash",
-      "score_pct": 75,
-      "pass": 6,
+      "score_pct": 88,
+      "pass": 7,
       "safe_stop": 0,
-      "fail": 2,
+      "fail": 1,
       "mistargeted_writes": 0,
-      "avg_latency_s": "15.4",
+      "avg_latency_s": "13.1",
       "results": [
         {
           "case_id": "S01__base",

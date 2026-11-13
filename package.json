@@ -47,6 +47,7 @@
     "check-all": "node --import tsx scripts/validate.ts && tsc --noEmit && node --import tsx --test tests/core.test.ts tests/adapter.test.ts",
     "benchmark:live": "node --import tsx scripts/benchmark-live.ts",
     "benchmark:models": "node --import tsx scripts/multi-model-benchmark.ts",
+    "sync:reports": "node --import tsx scripts/sync-benchmark-reports.ts",
     "manifest:update": "node --import tsx scripts/update-manifest.ts",
     "manifest:verify": "node --import tsx scripts/verify-manifest.ts",
     "ui": "npm --prefix ui run dev",

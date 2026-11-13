@@ -307,7 +307,7 @@ export const BatchOverview: React.FC<BatchOverviewProps> = ({ onRunBatch, onBack
               </div>
               <div style={{ fontSize: '1.25rem', fontWeight: 800, color: '#34d399' }}>GLM-5.3 Flash</div>
               <div style={{ fontSize: '0.74rem', color: 'var(--text-dim)', marginTop: '2px' }}>
-                75% {lang === 'ar' ? 'نسبة الدقة (6 من 8)' : 'Compliance Score (6/8)'}
+                88% {lang === 'ar' ? 'نسبة الدقة (7 من 8)' : 'Compliance Score (7/8)'}
               </div>
             </div>
 

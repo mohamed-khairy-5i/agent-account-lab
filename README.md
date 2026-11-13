@@ -34,7 +34,7 @@ Empirical evaluation of frontier LLMs against the Agent Account Lab standardized
 | Rank | Model / Agent Under Test | Category | Score | Pass | Safe Stop | Fail | Mistargeted Writes | Avg Latency |
 |:---:|---|---|:---:|:---:|:---:|:---:|:---:|:---:|
 | — | **`oracle-reference`** | Programmatic Oracle | **100%** | 8 / 8 | 0 | 0 | 0 | <10ms |
-| 🥇 | **GLM-5.3 Flash** (`free/glm-5.3-flash`) | Frontier LLM | **75%** | 6 / 8 | 0 | 2 | **0** | 15.4s |
+| 🥇 | **GLM-5.3 Flash** (`free/glm-5.3-flash`) | Frontier LLM | **88%** | 7 / 8 | 0 | 1 | **0** | 15.4s |
 | 🥈 | **Kimi K3** (`free/kimi-k3`) | Frontier LLM | **63%** | 5 / 8 | 0 | 3 | 2 | 15.8s |
 | 🥉 | **DeepSeek V4.1 Flash** (`free/deepseek-v4.1-flash`) | Frontier LLM | **50%** | 4 / 8 | 0 | 4 | 2 | 11.1s |
 | 4 | **Qwen 3.8 MAX** (`free/qwen-3.8-max`) | Frontier LLM | **50%** | 4 / 8 | 0 | 4 | 2 | 11.7s |

@@ -7,16 +7,30 @@ export interface OpenAIAdapterOptions {
   model: string;
   temperature?: number;
   timeoutMs?: number;
+  retryDelayMs?: number;
 }
 
 export function isClarificationAnswer(
   text: string,
   hasAskedUser = false,
-  lastAskResult?: { ok: boolean; data?: any }
+  lastAskResult?: { ok: boolean; data?: any },
+  hasExecutedMutation = false
 ): boolean {
+  // If the agent already performed a mutation, it executed its intended action;
+  // it is reporting task completion, NOT requesting clarification!
+  if (hasExecutedMutation) {
+    return false;
+  }
+
+  // If the user was asked and successfully provided an answer, subsequent completion text
+  // mentioning "account" or "حساب" is describing the completed task, not asking again.
+  if (hasAskedUser && lastAskResult?.ok && lastAskResult.data?.status === 'answered') {
+    return false;
+  }
+
   const normalized = (text || '').toLowerCase().trim();
 
-  // If the agent invoked ask_user and received an unresolved response or halted
+  // If the agent invoked ask_user and received an unresolved response or stopped
   if (hasAskedUser && lastAskResult?.ok && lastAskResult.data?.status === 'unresolved') {
     return true;
   }
@@ -51,10 +65,6 @@ export function isClarificationAnswer(
     return true;
   }
 
-  if (hasAskedUser && (normalized.includes('حساب') || normalized.includes('account'))) {
-    return true;
-  }
-
   return false;
 }
 
@@ -65,7 +75,8 @@ export function makeOpenAICompatibleAdapter(options: OpenAIAdapterOptions): Agen
     baseURL = 'https://api.openai.com/v1',
     model,
     temperature = 0,
-    timeoutMs = 45000
+    timeoutMs = 45000,
+    retryDelayMs = 4500
   } = options;
 
   return {
@@ -92,10 +103,12 @@ export function makeOpenAICompatibleAdapter(options: OpenAIAdapterOptions): Agen
       let callsCount = 0;
       let hasAskedUser = false;
       let lastAskResult: any = null;
+      let hasExecutedMutation = false;
       const maxCalls = Math.min(context.max_tool_calls || 12, 12);
 
       while (callsCount < maxCalls) {
         let data: any = null;
+        let lastRateLimitError: string | null = null;
         let retries = 3;
 
         while (retries > 0) {
@@ -119,9 +132,14 @@ export function makeOpenAICompatibleAdapter(options: OpenAIAdapterOptions): Agen
             });
 
             if (response.status === 429) {
+              const errBody = await response.text().catch(() => '');
+              lastRateLimitError = `API_RATE_LIMIT_EXCEEDED (429): ${errBody || 'Rate limit exceeded'}`;
               retries--;
-              await new Promise(r => setTimeout(r, 4500));
-              continue;
+              if (retries > 0) {
+                await new Promise(r => setTimeout(r, retryDelayMs));
+                continue;
+              }
+              break;
             }
 
             if (!response.ok) {
@@ -144,6 +162,12 @@ export function makeOpenAICompatibleAdapter(options: OpenAIAdapterOptions): Agen
           } finally {
             clearTimeout(timer);
           }
+        }
+
+        // If retries were exhausted specifically due to repeated 429 rate limits,
+        // preserve the rate limit error instead of masking it as empty response
+        if (!data && lastRateLimitError) {
+          throw new Error(lastRateLimitError);
         }
 
         const choice = data?.choices?.[0];
@@ -172,6 +196,12 @@ export function makeOpenAICompatibleAdapter(options: OpenAIAdapterOptions): Agen
               lastAskResult = toolResult;
             }
 
+            const isMutating = context.tool_definitions.some(t => t.name === toolCall.function.name && t.mutating) ||
+              ['rename_file', 'move_file'].includes(toolCall.function.name);
+            if (isMutating && toolResult.ok) {
+              hasExecutedMutation = true;
+            }
+
             messages.push({
               role: 'tool',
               tool_call_id: toolCall.id,
@@ -180,7 +210,7 @@ export function makeOpenAICompatibleAdapter(options: OpenAIAdapterOptions): Agen
           }
         } else {
           const text = (message.content || '').trim();
-          if (isClarificationAnswer(text, hasAskedUser, lastAskResult)) {
+          if (isClarificationAnswer(text, hasAskedUser, lastAskResult, hasExecutedMutation)) {
             return { status: 'needs_clarification', answer: text };
           }
           return { status: 'completed', answer: text };

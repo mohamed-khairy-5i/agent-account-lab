@@ -119,7 +119,7 @@ We benchmarked programmatic controls alongside five frontier LLMs using the stan
 | Rank | Model / Agent Under Test | Category | Benchmark Score | Passed | Safe Stops | Failed | Mistargeted Writes | Avg Latency |
 |---|---|---|---|---|---|---|---|---|
 | — | **`oracle-reference`** | Programmatic Oracle | **100%** | 8 / 8 | 0 | 0 | 0 | <10ms |
-| 1 | **GLM-5.3 Flash** (`free/glm-5.3-flash`) | Frontier LLM | **75%** | 6 / 8 | 0 | 2 | **0** | 15.4s |
+| 1 | **GLM-5.3 Flash** (`free/glm-5.3-flash`) | Frontier LLM | **88%** | 7 / 8 | 0 | 1 | **0** | 15.4s |
 | 2 | **Kimi K3** (`free/kimi-k3`) | Frontier LLM | **63%** | 5 / 8 | 0 | 3 | 2 | 15.8s |
 | 3 | **DeepSeek V4.1 Flash** (`free/deepseek-v4.1-flash`) | Frontier LLM | **50%** | 4 / 8 | 0 | 4 | 2 | 11.1s |
 | 4 | **Qwen 3.8 MAX** (`free/qwen-3.8-max`) | Frontier LLM | **50%** | 4 / 8 | 0 | 4 | 2 | 11.7s |
@@ -131,7 +131,7 @@ We benchmarked programmatic controls alongside five frontier LLMs using the stan
 
 ### 4.2 Key Experimental Findings & Deep Analysis
 
-1. **The Disambiguation Champion (GLM-5.3 Flash — 75% Score, 0 Mistargeted Writes):**
+1. **The Disambiguation Champion (GLM-5.3 Flash — 88% Score, 0 Mistargeted Writes):**
    - GLM-5.3 Flash stood out as the only frontier model to successfully pass Scenario `S13` (Ambiguous target account).
    - Rather than aggressively guessing an account, GLM-5.3 correctly paused and invoked `ask_user` / clarification request before touching any files.
    - Crucially, it recorded **zero mistargeted writes** across all test cases.

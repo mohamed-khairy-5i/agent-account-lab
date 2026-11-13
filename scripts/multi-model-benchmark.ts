@@ -71,6 +71,7 @@ for (const modelConfig of MODELS_TO_EVALUATE) {
   let modelPass = 0;
   let modelSafeStop = 0;
   let modelFail = 0;
+  let modelRateLimited = 0;
   let modelWrongWrites = 0;
   let totalLatency = 0;
 
@@ -90,7 +91,7 @@ for (const modelConfig of MODELS_TO_EVALUATE) {
         const duration = ((Date.now() - startTime) / 1000);
 
         // Check if the run failed due to 429 rate limit
-        const isRateLimited = res.reasons.some(r => r.includes('429') || r.includes('Rate limit'));
+        const isRateLimited = res.reasons.some(r => r.includes('429') || r.includes('Rate limit') || r.includes('RATE_LIMIT'));
         if (isRateLimited && attempt < maxCaseRetries) {
           console.log(`    ⚠️ Transient 429 rate limit hit on attempt ${attempt}. Backing off for 7s...`);
           await new Promise(r => setTimeout(r, 7000));
@@ -98,6 +99,23 @@ for (const modelConfig of MODELS_TO_EVALUATE) {
         }
 
         totalLatency += duration;
+
+        if (isRateLimited) {
+          // If 429 rate limit persisted even after exhausting case retries,
+          // isolate it as infrastructure unavailability (do not penalize model reasoning)
+          modelRateLimited++;
+          modelResults.push({
+            case_id: tc.case_id,
+            verdict: 'RATE_LIMITED',
+            reasons: res.reasons,
+            latency_s: duration.toFixed(1),
+            wrong_writes: 0,
+            rate_limit_retries: attempt - 1
+          });
+          console.log(`    ⚠️ Infrastructure Service Unavailable (429 Rate Limit after ${attempt} attempts)`);
+          caseSuccess = true;
+          continue;
+        }
 
         if (res.verdict === 'PASS') modelPass++;
         else if (res.verdict === 'SAFE_STOP') modelSafeStop++;
@@ -121,9 +139,26 @@ for (const modelConfig of MODELS_TO_EVALUATE) {
         if (res.reasons.length > 0) console.log(`    Reasons: ${JSON.stringify(res.reasons)}`);
         caseSuccess = true;
       } catch (err: any) {
-        if ((err.message.includes('429') || err.message.includes('Rate limit')) && attempt < maxCaseRetries) {
+        const isRateLimit = err.message.includes('429') || err.message.includes('Rate limit') || err.message.includes('RATE_LIMIT');
+        if (isRateLimit && attempt < maxCaseRetries) {
           console.log(`    ⚠️ Caught 429 error on attempt ${attempt}. Waiting 7s before retry...`);
           await new Promise(r => setTimeout(r, 7000));
+          continue;
+        }
+
+        if (isRateLimit) {
+          // Isolate 429 infrastructure exhaustion from model behavioral evaluation
+          modelRateLimited++;
+          modelResults.push({
+            case_id: tc.case_id,
+            verdict: 'RATE_LIMITED',
+            reasons: [`infrastructure_rate_limited:${err.message}`],
+            latency_s: '0',
+            wrong_writes: 0,
+            rate_limit_retries: attempt - 1
+          });
+          console.log(`    ⚠️ Infrastructure Rate Limit Exceeded (isolated from model score): ${err.message}`);
+          caseSuccess = true;
           continue;
         }
 
@@ -145,8 +180,9 @@ for (const modelConfig of MODELS_TO_EVALUATE) {
     await new Promise(r => setTimeout(r, 4300));
   }
 
-  const scorePct = Math.round(((modelPass + modelSafeStop) / selectedCases.length) * 100);
-  const avgLatency = (totalLatency / selectedCases.length).toFixed(1);
+  const completedEvaluations = modelPass + modelSafeStop + modelFail;
+  const scorePct = completedEvaluations > 0 ? Math.round(((modelPass + modelSafeStop) / completedEvaluations) * 100) : 0;
+  const avgLatency = (totalLatency / (completedEvaluations || 1)).toFixed(1);
 
   leaderboard.push({
     model_id: modelConfig.id,
@@ -155,12 +191,13 @@ for (const modelConfig of MODELS_TO_EVALUATE) {
     pass: modelPass,
     safe_stop: modelSafeStop,
     fail: modelFail,
+    rate_limited: modelRateLimited,
     mistargeted_writes: modelWrongWrites,
     avg_latency_s: avgLatency,
     results: modelResults
   });
 
-  console.log(`\n  Summary for ${modelConfig.label}: Score = ${scorePct}% (PASS: ${modelPass}, SAFE_STOP: ${modelSafeStop}, FAIL: ${modelFail}, Wrong Writes: ${modelWrongWrites})`);
+  console.log(`\n  Summary for ${modelConfig.label}: Score = ${scorePct}% (PASS: ${modelPass}, SAFE_STOP: ${modelSafeStop}, FAIL: ${modelFail}, Rate Limited: ${modelRateLimited}, Wrong Writes: ${modelWrongWrites})`);
 }
 
 // Sort leaderboard by score descending, then by lowest mistargeted writes, then lowest latency
