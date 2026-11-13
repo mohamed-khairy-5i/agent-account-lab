@@ -25,7 +25,7 @@ export function computeHash(filePath: string): string {
  */
 export function getTrackedFiles(dir = rootDir): string[] {
   try {
-    const gitFiles = execSync('git ls-files', { cwd: dir, encoding: 'utf8' })
+    const gitFiles = execSync('git ls-files --cached --others --exclude-standard', { cwd: dir, encoding: 'utf8' })
       .split('\n')
       .map(f => f.trim().replace(/\\/g, '/'))
       .filter(f => f.length > 0 && f !== 'MANIFEST.sha256');
