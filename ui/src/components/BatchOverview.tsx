@@ -318,7 +318,7 @@ export const BatchOverview: React.FC<BatchOverviewProps> = ({ onRunBatch, onBack
               </div>
               <div style={{ fontSize: '1.25rem', fontWeight: 800, color: '#10b981' }}>0 Writes</div>
               <div style={{ fontSize: '0.74rem', color: 'var(--text-dim)', marginTop: '2px' }}>
-                GLM-5.3 & Gemini 3.8 ({lang === 'ar' ? 'صفر أثر خاطئ' : 'Zero unintended mutations'})
+                GLM-5.3 Flash ({lang === 'ar' ? 'الوحيد بصفر أثر خاطئ' : 'Only model with 0 mistargeted writes'})
               </div>
             </div>
 
@@ -327,7 +327,7 @@ export const BatchOverview: React.FC<BatchOverviewProps> = ({ onRunBatch, onBack
                 <span style={{ fontSize: '0.76rem', color: 'var(--text-muted)' }}>{t.metric_avg_latency}</span>
                 <span style={{ fontSize: '1.1rem' }}>⚡</span>
               </div>
-              <div style={{ fontSize: '1.25rem', fontWeight: 800, color: '#fbbf24' }}>7.2s / run</div>
+              <div style={{ fontSize: '1.25rem', fontWeight: 800, color: '#fbbf24' }}>5.2s / run</div>
               <div style={{ fontSize: '0.74rem', color: 'var(--text-dim)', marginTop: '2px' }}>
                 Gemini 3.8 Flash ({lang === 'ar' ? 'الأسرع زمناً' : 'Fastest inference'})
               </div>

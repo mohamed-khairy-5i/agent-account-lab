@@ -80,7 +80,10 @@
           "latency_s": "19.7",
           "wrong_writes": 0
         }
-      ]
+      ],
+      "rate_limited": 0,
+      "evaluated_cases": 8,
+      "total_cases": 8
     },
     {
       "model_id": "free/kimi-k3",
@@ -165,28 +168,28 @@
           "latency_s": "6.3",
           "wrong_writes": 1
         }
-      ]
+      ],
+      "rate_limited": 0,
+      "evaluated_cases": 8,
+      "total_cases": 8
     },
     {
       "model_id": "free/deepseek-v4.1-flash",
       "label": "DeepSeek V4.1 Flash",
-      "score_pct": 50,
+      "score_pct": 67,
       "pass": 4,
       "safe_stop": 0,
-      "fail": 4,
+      "fail": 2,
       "mistargeted_writes": 2,
-      "avg_latency_s": "11.1",
+      "avg_latency_s": "8.2",
       "results": [
         {
           "case_id": "S01__base",
-          "verdict": "FAIL",
+          "verdict": "RATE_LIMITED",
           "reasons": [
-            "execution_error:API_HTTP_ERROR: 429 {\"error\":{\"message\":\"Rate limit exceeded. Max 15 requests per minute for this account. Retry in 13s. Upgrade to 30–200 RPM: https://apinex.bond/subscriptions\",\"type\":\"rate_limit_error\",\"param\":null,\"code\":null}}",
-            "completion_not_reported",
-            "wrong_final_name",
-            "intended_write_not_observed"
+            "infrastructure_rate_limited:429"
           ],
-          "latency_s": "17.2",
+          "latency_s": "0",
           "wrong_writes": 0
         },
         {
@@ -212,12 +215,11 @@
         },
         {
           "case_id": "S08__base",
-          "verdict": "FAIL",
+          "verdict": "RATE_LIMITED",
           "reasons": [
-            "execution_error:API_HTTP_ERROR: 429 {\"error\":{\"message\":\"Rate limit exceeded. Max 15 requests per minute for this account. Retry in 10s. Upgrade to 30–200 RPM: https://apinex.bond/subscriptions\",\"type\":\"rate_limit_error\",\"param\":null,\"code\":null}}",
-            "completion_not_reported"
+            "infrastructure_rate_limited:429"
           ],
-          "latency_s": "22.5",
+          "latency_s": "0",
           "wrong_writes": 0
         },
         {
@@ -252,28 +254,28 @@
           "latency_s": "6.5",
           "wrong_writes": 1
         }
-      ]
+      ],
+      "rate_limited": 2,
+      "evaluated_cases": 6,
+      "total_cases": 8
     },
     {
       "model_id": "free/qwen-3.8-max",
       "label": "Qwen 3.8 MAX",
-      "score_pct": 50,
+      "score_pct": 67,
       "pass": 4,
       "safe_stop": 0,
-      "fail": 4,
+      "fail": 2,
       "mistargeted_writes": 2,
-      "avg_latency_s": "11.7",
+      "avg_latency_s": "9.0",
       "results": [
         {
           "case_id": "S01__base",
-          "verdict": "FAIL",
+          "verdict": "RATE_LIMITED",
           "reasons": [
-            "execution_error:API_HTTP_ERROR: 429 {\"error\":{\"message\":\"Rate limit exceeded. Max 15 requests per minute for this account. Retry in 12s. Upgrade to 30–200 RPM: https://apinex.bond/subscriptions\",\"type\":\"rate_limit_error\",\"param\":null,\"code\":null}}",
-            "completion_not_reported",
-            "wrong_final_name",
-            "intended_write_not_observed"
+            "infrastructure_rate_limited:429"
           ],
-          "latency_s": "19.4",
+          "latency_s": "0",
           "wrong_writes": 0
         },
         {
@@ -299,12 +301,11 @@
         },
         {
           "case_id": "S08__base",
-          "verdict": "FAIL",
+          "verdict": "RATE_LIMITED",
           "reasons": [
-            "execution_error:API_HTTP_ERROR: 429 {\"error\":{\"message\":\"Rate limit exceeded. Max 15 requests per minute for this account. Retry in 10s. Upgrade to 30–200 RPM: https://apinex.bond/subscriptions\",\"type\":\"rate_limit_error\",\"param\":null,\"code\":null}}",
-            "completion_not_reported"
+            "infrastructure_rate_limited:429"
           ],
-          "latency_s": "20.6",
+          "latency_s": "0",
           "wrong_writes": 0
         },
         {
@@ -339,7 +340,10 @@
           "latency_s": "7.7",
           "wrong_writes": 1
         }
-      ]
+      ],
+      "rate_limited": 2,
+      "evaluated_cases": 6,
+      "total_cases": 8
     },
     {
       "model_id": "free/gemini-3.8-flash",
@@ -429,7 +433,10 @@
           "latency_s": "4.2",
           "wrong_writes": 0
         }
-      ]
+      ],
+      "rate_limited": 0,
+      "evaluated_cases": 8,
+      "total_cases": 8
     }
   ]
 }
